@@ -21,7 +21,6 @@ int contaAds = 0;
 int contaCiclos = 0;
 int contaDes = 0;
 int delimiter = 0;
-int run = 0;
 int solen = 0;
 int v1 = 0;
 int v2 = 0;
@@ -56,7 +55,6 @@ void setup()
 }
 //_______________________________________________________
 void loop() {
-  run = 0;
   serialEvent();
   serial1Send();
 }
@@ -74,12 +72,8 @@ void serialEvent() {
       if(executar == 1) {
         roda();
       }
-      else{
-        run = 0;
-      }
     }
     else{
-      run = 0;
       executar = 0;
     }
   }
@@ -160,3 +154,4 @@ void ads()
   }
   cicloAtual = 0;
 }
+
