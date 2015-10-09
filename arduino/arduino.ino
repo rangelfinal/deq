@@ -160,39 +160,3 @@ void ads()
   }
   cicloAtual = 0;
 }
-//_______________________________________________________
-void manda(){
-  tempo = millis();
-  tempo /= 1000;
-  v1 = map( analogRead(A0), 0, 1024, 0, 5000);
-  v2 = map( analogRead(A1), 0, 1024, 0, 5000);
-  vPotencial = map( analogRead(A2), 0, 1024, 0, 5000);
-
-  if (fonte2 == 1) {
-    v1 = (v1 * (-1));
-    v2 = (v2 * (-1));
-  }
-
-  Serial.print(v1);
-  Serial.print(";");
-  Serial.print(v2 );
-  Serial.print(";");
-  Serial.print(vPotencial );
-  Serial.print(";");
-  Serial.print(vai);
-  Serial.print(";");
-  Serial.print(run);
-  Serial.print(";");
-  Serial.print(contaAds);
-  Serial.print(";");
-  Serial.print(contaDes);
-  Serial.print(";");
-  Serial.print(contaCiclos);
-  Serial.print(";");
-  Serial.print(cicloAtual);
-  Serial.print(";");
-  Serial.print(tempo);
-  Serial.print(";");
-  Serial.print(solen);
-  Serial.println(";");
-}
