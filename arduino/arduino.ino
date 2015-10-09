@@ -35,7 +35,7 @@ void setup()
   Serial.begin(9600);
   Serial1.begin(2400);
 
-  respString.reserve(260);
+  respString.reserve(500);
 
   pinMode( 44, OUTPUT);
   pinMode( 45, OUTPUT);
@@ -80,32 +80,32 @@ void serialEvent() {
 }
 //_______________________________________________________
 void serial1Send() {
-    char inChar = (char)Serial1.read();
-    if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
-      delimiter = respString.indexOf('=');
-      if (delimiter != -1)  {
-        propriety = respString.substring(0,delimiter-1);
-        propriety.toLowerCase();
-        propriety.trim();
-        value = respString.substring(delimiter+1,respString.length()).toFloat();
-        if (propriety == "ph") {
-          ph = value;
-        }
-        else if (propriety == "temperature") {
-          temperature = value;
-        }
-        else if (propriety == "conductivity") {
-          conductivity = value;
-        }
-        else if (propriety == "voltage") {
-          voltage = value;
-        }
-        propriety = "";
-        value = -1;
-        respString = "";
+  char inChar = (char)Serial1.read();
+  if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
+    delimiter = respString.indexOf('=');
+    if (delimiter != -1)  {
+      propriety = respString.substring(0,delimiter-1);
+      propriety.toLowerCase();
+      propriety.trim();
+      value = respString.substring(delimiter+1,respString.length()).toFloat();
+      if (propriety == "ph") {
+        ph = value;
       }
+      else if (propriety == "temperature") {
+        temperature = value;
+      }
+      else if (propriety == "conductivity") {
+        conductivity = value;
+      }
+      else if (propriety == "voltage") {
+        voltage = value;
+      }
+      propriety = "";
+      value = -1;
+      respString = "";
     }
-    if (inChar != 152) respString += inChar;
+  }
+  if (inChar != 152) respString += inChar;
   sprintf(serialString, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperature, conductivity, voltage, contaCiclos);
   Serial.println(serialString);
 }
@@ -154,4 +154,3 @@ void ads()
   }
   cicloAtual = 0;
 }
-
