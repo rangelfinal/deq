@@ -76,17 +76,12 @@ void serialEvent() {
       }
       else{
         run = 0;
-        serialEvent();
       }
     }
     else{
       run = 0;
       executar = 0;
-      serialEvent();
     }
-  }
-  else{
-    serialEvent();
   }
 }
 //_______________________________________________________
