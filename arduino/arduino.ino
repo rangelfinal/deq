@@ -21,7 +21,6 @@ int contaAds = 0;
 int contaCiclos = 0;
 int contaDes = 0;
 int delimiter = 0;
-int run = 0;
 int solen = 0;
 int v1 = 0;
 int v2 = 0;
@@ -36,7 +35,7 @@ void setup()
   Serial.begin(9600);
   Serial1.begin(2400);
 
-  respString.reserve(260);
+  respString.reserve(500);
 
   pinMode( 44, OUTPUT);
   pinMode( 45, OUTPUT);
@@ -56,7 +55,6 @@ void setup()
 }
 //_______________________________________________________
 void loop() {
-  run = 0;
   serialEvent();
   serial1Send();
 }
@@ -74,49 +72,40 @@ void serialEvent() {
       if(executar == 1) {
         roda();
       }
-      else{
-        run = 0;
-        serialEvent();
-      }
     }
     else{
-      run = 0;
       executar = 0;
-      serialEvent();
     }
-  }
-  else{
-    serialEvent();
   }
 }
 //_______________________________________________________
 void serial1Send() {
-    char inChar = (char)Serial1.read();
-    if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
-      delimiter = respString.indexOf('=');
-      if (delimiter != -1)  {
-        propriety = respString.substring(0,delimiter-1);
-        propriety.toLowerCase();
-        propriety.trim();
-        value = respString.substring(delimiter+1,respString.length()).toFloat();
-        if (propriety == "ph") {
-          ph = value;
-        }
-        else if (propriety == "temperature") {
-          temperature = value;
-        }
-        else if (propriety == "conductivity") {
-          conductivity = value;
-        }
-        else if (propriety == "voltage") {
-          voltage = value;
-        }
-        propriety = "";
-        value = -1;
-        respString = "";
+  char inChar = (char)Serial1.read();
+  if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
+    delimiter = respString.indexOf('=');
+    if (delimiter != -1)  {
+      propriety = respString.substring(0,delimiter-1);
+      propriety.toLowerCase();
+      propriety.trim();
+      value = respString.substring(delimiter+1,respString.length()).toFloat();
+      if (propriety == "ph") {
+        ph = value;
       }
+      else if (propriety == "temperature") {
+        temperature = value;
+      }
+      else if (propriety == "conductivity") {
+        conductivity = value;
+      }
+      else if (propriety == "voltage") {
+        voltage = value;
+      }
+      propriety = "";
+      value = -1;
+      respString = "";
     }
-    if (inChar != 152) respString += inChar;
+  }
+  if (inChar != 152) respString += inChar;
   sprintf(serialString, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperature, conductivity, voltage, contaCiclos);
   Serial.println(serialString);
 }
@@ -164,40 +153,4 @@ void ads()
     contaCiclos++;
   }
   cicloAtual = 0;
-}
-//_______________________________________________________
-void manda(){
-  tempo = millis();
-  tempo /= 1000;
-  v1 = map( analogRead(A0), 0, 1024, 0, 5000);
-  v2 = map( analogRead(A1), 0, 1024, 0, 5000);
-  vPotencial = map( analogRead(A2), 0, 1024, 0, 5000);
-
-  if (fonte2 == 1) {
-    v1 = (v1 * (-1));
-    v2 = (v2 * (-1));
-  }
-
-  Serial.print(v1);
-  Serial.print(";");
-  Serial.print(v2 );
-  Serial.print(";");
-  Serial.print(vPotencial );
-  Serial.print(";");
-  Serial.print(vai);
-  Serial.print(";");
-  Serial.print(run);
-  Serial.print(";");
-  Serial.print(contaAds);
-  Serial.print(";");
-  Serial.print(contaDes);
-  Serial.print(";");
-  Serial.print(contaCiclos);
-  Serial.print(";");
-  Serial.print(cicloAtual);
-  Serial.print(";");
-  Serial.print(tempo);
-  Serial.print(";");
-  Serial.print(solen);
-  Serial.println(";");
 }
