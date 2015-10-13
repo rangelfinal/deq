@@ -22,6 +22,7 @@ int contaCiclos = 0;
 int contaDes = 0;
 int delimiter = 0;
 int solen = 0;
+int timeout = 5000;
 int v1 = 0;
 int v2 = 0;
 int vai = 0;
@@ -30,12 +31,12 @@ String propriety = "";
 String respString = "";
 
 //_______________________________________________________
-void setup()
-{
+void setup() {
   Serial.begin(9600);
   Serial1.begin(2400);
 
-  respString.reserve(500);
+  while(!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
+  respString.reserve(5000);
 
   pinMode( 44, OUTPUT);
   pinMode( 45, OUTPUT);
@@ -56,61 +57,74 @@ void setup()
 //_______________________________________________________
 void loop() {
   serialEvent();
-  serial1Send();
+  serial1Event();
+  delay(500);
 }
 //_______________________________________________________
 void serialEvent() {
-  digitoVerificadorInicial = Serial.parseFloat(); // leitura da serial
-  if (digitoVerificadorInicial == 8) { // teste básico(se o primeiro caractere (verificador) é igual a 8
-    fonte1 = Serial.parseFloat();
-    fonte2 = Serial.parseFloat();
-    solenoide = Serial.parseFloat();
-    executar = Serial.parseFloat();
-    digitoVerificadorFinal = Serial.parseFloat();
-
-    if (digitoVerificadorFinal == 922) { // verifica se o caractere verificador final foi recebido
-      if(executar == 1) {
-        roda();
+  if (Serial.available() > 0) {
+    digitoVerificadorInicial = Serial.parseFloat(); // leitura da serial
+    if (digitoVerificadorInicial == 8) { // teste básico(se o primeiro caractere (verificador) é igual a 8
+      fonte1 = Serial.parseFloat();
+      fonte2 = Serial.parseFloat();
+      solenoide = Serial.parseFloat();
+      executar = Serial.parseFloat();
+      digitoVerificadorFinal = Serial.parseFloat();
+      cleanSerialBuffer();
+      if (digitoVerificadorFinal == 922) { // verifica se o caractere verificador final foi recebido
+        if(executar == 1) {
+          roda();
+        }
       }
-    }
-    else{
-      executar = 0;
+      else{
+        executar = 0;
+      }
     }
   }
 }
 //_______________________________________________________
-void serial1Send() {
-  char inChar = (char)Serial1.read();
-  if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
-    delimiter = respString.indexOf('=');
-    if (delimiter != -1)  {
-      propriety = respString.substring(0,delimiter-1);
-      propriety.toLowerCase();
-      propriety.trim();
-      value = respString.substring(delimiter+1,respString.length()).toFloat();
-      if (propriety == "ph") {
-        ph = value;
+void serial1Event() {
+  if (Serial1.available()) {
+    while (Serial1.available() > 0) {
+      char inChar = (char)Serial1.read();
+      if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
+        delimiter = respString.indexOf('=');
+        if (delimiter != -1)  {
+          propriety = respString.substring(0,delimiter-1);
+          propriety.toLowerCase();
+          propriety.trim();
+          value = respString.substring(delimiter+1,respString.length()).toFloat();
+          if (propriety == "ph") {
+            ph = value;
+          }
+          else if (propriety == "temperature") {
+            temperature = value;
+          }
+          else if (propriety == "conductivity") {
+            conductivity = value;
+          }
+          else if (propriety == "voltage") {
+            voltage = value;
+          }
+          propriety = "";
+          value = -1;
+          respString = "";
+        }
       }
-      else if (propriety == "temperature") {
-        temperature = value;
-      }
-      else if (propriety == "conductivity") {
-        conductivity = value;
-      }
-      else if (propriety == "voltage") {
-        voltage = value;
-      }
-      propriety = "";
-      value = -1;
-      respString = "";
+      if (inChar != 152) respString += inChar;
     }
+    serialSend();
   }
-  if (inChar != 152) respString += inChar;
+}
+//_______________________________________________________
+void serialSend() {
   sprintf(serialString, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperature, conductivity, voltage, contaCiclos);
-  Serial.println(serialString);
+  if (Serial.availableForWrite() >0) {
+    Serial.println(serialString);
+  }
 }
 //_______________________________________________________
-void roda(){
+void roda() {
   if (solenoide == 1 ) {
     digitalWrite( 47, LOW );
   }
@@ -131,8 +145,7 @@ void roda(){
   }
 }
 //_______________________________________________________
-void des()
-{
+void des() {
   contaDes++;
   contaAds = 0;
   digitalWrite( 45, HIGH );
@@ -143,8 +156,7 @@ void des()
   cicloAtual = 1;
 }
 //_______________________________________________________
-void ads()
-{
+void ads() {
   contaAds++;
   contaDes = 0;
   digitalWrite( 45, LOW );
@@ -154,3 +166,12 @@ void ads()
   }
   cicloAtual = 0;
 }
+//_______________________________________________________
+void cleanSerialBuffer() {
+  if(Serial.available()) {
+    while(Serial.available()) {
+      char t = Serial.read();
+    }
+  }
+}
+
