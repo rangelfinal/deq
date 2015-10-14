@@ -4,18 +4,18 @@
 
 char inChar;
 char *serialString;
-float conductivity = 0;
+float conductivity = -1;
 float digitoVerificadorFinal = 0;
 float digitoVerificadorInicial = 0;
 float executar = 0;
 float fonte1 = 0;
 float fonte2 = 0;
-float ph = 0;
+float ph = -1;
 float solenoide = 0;
-float temperature = 0;
+float temperature = -1;
 float tempo = 0;
-float value = 0;
-float voltage = 0;
+float value = -1;
+float voltage = -1;
 int cicloAtual = 0;
 int contaAds = 0;
 int contaCiclos = 0;
@@ -56,12 +56,12 @@ void setup() {
 }
 //_______________________________________________________
 void loop() {
-  serialEvent();
-  serial1Event();
-  delay(500);
+  delay(10);
+  if (Serial1.read() != -1) Serial.print(Serial1.read());
 }
 //_______________________________________________________
 void serialEvent() {
+  // Formato da string de entrada: verificadorInicial(8);fonte1(0|1);fonte2(0|1);solenoide(0|1);executar(0|1);verificadorFinal(922)
   if (Serial.available() > 0) {
     digitoVerificadorInicial = Serial.parseFloat(); // leitura da serial
     if (digitoVerificadorInicial == 8) { // teste básico(se o primeiro caractere (verificador) é igual a 8
@@ -168,10 +168,8 @@ void ads() {
 }
 //_______________________________________________________
 void cleanSerialBuffer() {
-  if(Serial.available()) {
-    while(Serial.available()) {
-      char t = Serial.read();
-    }
+  while(Serial.available()) {
+    char t = Serial.read();
   }
 }
 
