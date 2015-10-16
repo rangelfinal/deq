@@ -35,7 +35,7 @@ void setup() {
   Serial.begin(9600);
   Serial1.begin(2400);
 
-  while(!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
+  while (!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
   respString.reserve(5000);
 
   pinMode( 44, OUTPUT);
@@ -57,7 +57,12 @@ void setup() {
 //_______________________________________________________
 void loop() {
   delay(10);
-  if (Serial1.read() != -1) Serial.print(Serial1.read());
+  char inChar = (char)Serial1.read();
+  respString += inChar;
+  if (inChar != 'ÿ') {
+    Serial.print(respString);
+    respString = "";
+  }
 }
 //_______________________________________________________
 void serialEvent() {
@@ -72,11 +77,11 @@ void serialEvent() {
       digitoVerificadorFinal = Serial.parseFloat();
       cleanSerialBuffer();
       if (digitoVerificadorFinal == 922) { // verifica se o caractere verificador final foi recebido
-        if(executar == 1) {
+        if (executar == 1) {
           roda();
         }
       }
-      else{
+      else {
         executar = 0;
       }
     }
@@ -86,14 +91,15 @@ void serialEvent() {
 void serial1Event() {
   if (Serial1.available()) {
     while (Serial1.available() > 0) {
-      char inChar = (char)Serial1.read();
-      if (inChar == 10 || inChar == 13) { // Se for uma quebra de linha, gravar variável
+      int readBit = Serial1.read();
+      char inChar = (char)readBit;
+      if (readBit == 10 || readBit == 13) { // Se for uma quebra de linha, gravar variável
         delimiter = respString.indexOf('=');
         if (delimiter != -1)  {
-          propriety = respString.substring(0,delimiter-1);
+          propriety = respString.substring(0, delimiter - 1);
           propriety.toLowerCase();
           propriety.trim();
-          value = respString.substring(delimiter+1,respString.length()).toFloat();
+          value = respString.substring(delimiter + 1, respString.length()).toFloat();
           if (propriety == "ph") {
             ph = value;
           }
@@ -119,7 +125,7 @@ void serial1Event() {
 //_______________________________________________________
 void serialSend() {
   sprintf(serialString, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperature, conductivity, voltage, contaCiclos);
-  if (Serial.availableForWrite() >0) {
+  if (Serial.availableForWrite() > 0) {
     Serial.println(serialString);
   }
 }
@@ -168,7 +174,7 @@ void ads() {
 }
 //_______________________________________________________
 void cleanSerialBuffer() {
-  while(Serial.available()) {
+  while (Serial.available()) {
     char t = Serial.read();
   }
 }
