@@ -92,32 +92,34 @@ void serial1Event() {
   if (Serial1.available()) {
     while (Serial1.available() > 0) {
       int readBit = Serial1.read();
-      char inChar = (char)readBit;
-      if (readBit == 10 || readBit == 13) { // Se for uma quebra de linha, gravar variável
-        delimiter = respString.indexOf('=');
-        if (delimiter != -1)  {
-          propriety = respString.substring(0, delimiter - 1);
-          propriety.toLowerCase();
-          propriety.trim();
-          value = respString.substring(delimiter + 1, respString.length()).toFloat();
-          if (propriety == "ph") {
-            ph = value;
+      if (readBit != -1) {
+        char inChar = (char)readBit;
+        if (readBit == 10 || readBit == 13) { // Se for uma quebra de linha, gravar variável
+          delimiter = respString.indexOf('=');
+          if (delimiter != -1)  {
+            propriety = respString.substring(0, delimiter - 1);
+            propriety.toLowerCase();
+            propriety.trim();
+            value = respString.substring(delimiter + 1, respString.length()).toFloat();
+            if (propriety == "ph") {
+              ph = value;
+            }
+            else if (propriety == "temperature") {
+              temperature = value;
+            }
+            else if (propriety == "conductivity") {
+              conductivity = value;
+            }
+            else if (propriety == "voltage") {
+              voltage = value;
+            }
+            propriety = "";
+            value = -1;
+            respString = "";
           }
-          else if (propriety == "temperature") {
-            temperature = value;
-          }
-          else if (propriety == "conductivity") {
-            conductivity = value;
-          }
-          else if (propriety == "voltage") {
-            voltage = value;
-          }
-          propriety = "";
-          value = -1;
-          respString = "";
         }
+        if (inChar != 152) respString += inChar;
       }
-      if (inChar != 152) respString += inChar;
     }
     serialSend();
   }
@@ -178,4 +180,3 @@ void cleanSerialBuffer() {
     char t = Serial.read();
   }
 }
-
