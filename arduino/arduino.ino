@@ -32,7 +32,7 @@ String respString = "";
 
 //_______________________________________________________
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(250000);
   Serial1.begin(2400);
 
   while (!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
@@ -57,12 +57,7 @@ void setup() {
 //_______________________________________________________
 void loop() {
   delay(10);
-  char inChar = (char)Serial1.read();
-  respString += inChar;
-  if (inChar != 'ÿ') {
-    Serial.print(respString);
-    respString = "";
-  }
+  serial1Event();
 }
 //_______________________________________________________
 void serialEvent() {
@@ -91,6 +86,7 @@ void serialEvent() {
 void serial1Event() {
   if (Serial1.available()) {
     while (Serial1.available() > 0) {
+      delay(20);
       int readBit = Serial1.read();
       if (readBit != -1) {
         char inChar = (char)readBit;
@@ -103,15 +99,19 @@ void serial1Event() {
             value = respString.substring(delimiter + 1, respString.length()).toFloat();
             if (propriety == "ph") {
               ph = value;
+              Serial.println(ph);
             }
             else if (propriety == "temperature") {
               temperature = value;
+              Serial.println(temperature);
             }
             else if (propriety == "conductivity") {
               conductivity = value;
+              Serial.println(conductivity);
             }
             else if (propriety == "voltage") {
               voltage = value;
+              Serial.println(voltage);
             }
             propriety = "";
             value = -1;
@@ -121,15 +121,16 @@ void serial1Event() {
         if (inChar != 152) respString += inChar;
       }
     }
+    delay(50);
     serialSend();
   }
 }
 //_______________________________________________________
 void serialSend() {
   sprintf(serialString, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperature, conductivity, voltage, contaCiclos);
-  if (Serial.availableForWrite() > 0) {
-    Serial.println(serialString);
-  }
+  delay(50);
+  Serial.println("Serial send");
+  Serial.println(serialString);
 }
 //_______________________________________________________
 void roda() {
