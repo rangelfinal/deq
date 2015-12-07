@@ -84,41 +84,41 @@ void serialEvent() {
 }
 //_______________________________________________________
 void serial1Event() {
+  String line = "";
   if (Serial1.available()) {
     while (Serial1.available() > 0) {
-      delay(20);
       int readBit = Serial1.read();
       if (readBit != -1) {
         char inChar = (char)readBit;
-        if (readBit == 10 || readBit == 13) { // Se for uma quebra de linha, gravar variável
-          delimiter = respString.indexOf('=');
-          if (delimiter != -1)  {
-            propriety = respString.substring(0, delimiter - 1);
-            propriety.toLowerCase();
-            propriety.trim();
-            value = respString.substring(delimiter + 1, respString.length()).toFloat();
-            if (propriety == "ph") {
-              ph = value;
-              Serial.println(ph);
-            }
-            else if (propriety == "temperature") {
-              temperature = value;
-              Serial.println(temperature);
-            }
-            else if (propriety == "conductivity") {
-              conductivity = value;
-              Serial.println(conductivity);
-            }
-            else if (propriety == "voltage") {
-              voltage = value;
-              Serial.println(voltage);
-            }
-            propriety = "";
-            value = -1;
-            respString = "";
-          }
-        }
         if (inChar != 152) respString += inChar;
+      }
+    }
+    for(int aux = 0; aux < respString.length(); aux++) {
+      int charValue = (int)respString[aux];
+      line += respString[aux];
+      if (charValue == 10 || charValue == 13) { // Se for uma quebra de linha, gravar variável
+        delimiter = line.indexOf("=");
+        if (delimiter != -1)  {
+          propriety = line.substring(0, delimiter);
+          propriety.toLowerCase();
+          propriety.trim();
+          value = line.substring(delimiter, line.length()).toFloat();
+          if (propriety.indexOf("ph") != -1) {
+            ph = value;
+          }
+          else if (propriety.indexOf("temperature") != -1) {
+            temperature = value;
+          }
+          else if (propriety.indexOf("conductivity") != -1) {
+            conductivity = value;
+          }
+          else if (propriety.indexOf("voltage") != -1) {
+            voltage = value;
+          }
+          propriety = "";
+          value = -1;
+          line = "";
+        }
       }
     }
     delay(50);
