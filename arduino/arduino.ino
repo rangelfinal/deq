@@ -2,41 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-char inChar;
-char *serialString;
-float conductivity = -1;
-float digitoVerificadorFinal = 0;
-float digitoVerificadorInicial = 0;
-float executar = 0;
-float fonte1 = 0;
-float fonte2 = 0;
-float ph = -1;
-float solenoide = 0;
-float temperature = -1;
-float tempo = 0;
-float value = -1;
-float voltage = -1;
-int cicloAtual = 0;
-int contaAds = 0;
-int contaCiclos = 0;
-int contaDes = 0;
-int delimiter = 0;
-int solen = 0;
-int timeout = 5000;
-int v1 = 0;
-int v2 = 0;
-int vai = 0;
-int vPotencial = 0;
-String propriety = "";
-String respString = "";
-
+String input;
+int fonte1, fonte2, solenoide, executar, contaQuebraLinhas, contaCiclos, contaDes, contaAds, cicloAtual;
 //_______________________________________________________
 void setup() {
-  Serial.begin(250000);
+  Serial.begin(9600);
   Serial1.begin(2400);
 
   while (!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
-  respString.reserve(5000);
+  input = "";
+  contaQuebraLinhas = 0;
 
   pinMode( 44, OUTPUT);
   pinMode( 45, OUTPUT);
@@ -56,20 +31,20 @@ void setup() {
 }
 //_______________________________________________________
 void loop() {
-  delay(10);
-  serial1Event();
+  serialRead();
+  serial1Read();
 }
 //_______________________________________________________
-void serialEvent() {
+void serialRead() {
   // Formato da string de entrada: verificadorInicial(8);fonte1(0|1);fonte2(0|1);solenoide(0|1);executar(0|1);verificadorFinal(922)
   if (Serial.available() > 0) {
-    digitoVerificadorInicial = Serial.parseFloat(); // leitura da serial
+    float digitoVerificadorInicial = Serial.parseFloat(); // leitura da serial
     if (digitoVerificadorInicial == 8) { // teste básico(se o primeiro caractere (verificador) é igual a 8
       fonte1 = Serial.parseFloat();
       fonte2 = Serial.parseFloat();
       solenoide = Serial.parseFloat();
       executar = Serial.parseFloat();
-      digitoVerificadorFinal = Serial.parseFloat();
+      float digitoVerificadorFinal = Serial.parseFloat();
       cleanSerialBuffer();
       if (digitoVerificadorFinal == 922) { // verifica se o caractere verificador final foi recebido
         if (executar == 1) {
@@ -83,54 +58,49 @@ void serialEvent() {
   }
 }
 //_______________________________________________________
-void serial1Event() {
-  String line = "";
-  if (Serial1.available()) {
-    while (Serial1.available() > 0) {
-      int readBit = Serial1.read();
-      if (readBit != -1) {
-        char inChar = (char)readBit;
-        if (inChar != 152) respString += inChar;
-      }
-    }
-    for(int aux = 0; aux < respString.length(); aux++) {
-      int charValue = (int)respString[aux];
-      line += respString[aux];
-      if (charValue == 10 || charValue == 13) { // Se for uma quebra de linha, gravar variável
-        delimiter = line.indexOf("=");
-        if (delimiter != -1)  {
-          propriety = line.substring(0, delimiter);
-          propriety.toLowerCase();
-          propriety.trim();
-          value = line.substring(delimiter, line.length()).toFloat();
-          if (propriety.indexOf("ph") != -1) {
-            ph = value;
-          }
-          else if (propriety.indexOf("temperature") != -1) {
-            temperature = value;
-          }
-          else if (propriety.indexOf("conductivity") != -1) {
-            conductivity = value;
-          }
-          else if (propriety.indexOf("voltage") != -1) {
-            voltage = value;
-          }
-          propriety = "";
-          value = -1;
-          line = "";
-        }
-      }
-    }
-    delay(50);
-    serialSend();
+void serial1Read() {
+  char charRead = Serial1.read();
+  int intRead = (int) charRead;
+  float ph, temperatura, condutividade, voltagem;
+  if (intRead != -1 && intRead != 10 && intRead != 13) {
+    input += charRead;
   }
-}
-//_______________________________________________________
-void serialSend() {
-  sprintf(serialString, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperature, conductivity, voltage, contaCiclos);
-  delay(50);
-  Serial.println("Serial send");
-  Serial.println(serialString);
+  if (intRead == 10 || intRead == 13) {
+    input += ' ';
+    contaQuebraLinhas++;
+  }
+  else {
+    contaQuebraLinhas = 0;
+  }
+  if (contaQuebraLinhas == 4) {
+    int aux = 0;
+    contaQuebraLinhas = 0;
+    while (input.indexOf('=', aux) >= 0) {
+      aux = input.indexOf('=', aux);
+      String variavel = input.substring(input.lastIndexOf(' ', aux - 2), aux - 1);
+      variavel.trim();
+      variavel.toLowerCase();
+      String valor = input.substring(aux + 1, input.indexOf(' ', aux + 1));
+      valor.trim();
+      valor.toLowerCase();
+      if (variavel == "ph") {
+        ph = valor.toFloat();
+      }
+      else if (variavel == "temperature") {
+        temperatura = valor.toFloat();
+      }
+      else if (variavel == "conductivity") {
+        condutividade = valor.toFloat();
+      }
+      else if (variavel == "voltage") {
+        voltagem = valor.toFloat();
+      }
+    }
+    char* stringFormatada;
+    sprintf(stringFormatada, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperatura, condutividade, voltagem, contaCiclos);
+    Serial.println(stringFormatada);
+    input = "";
+  }
 }
 //_______________________________________________________
 void roda() {
