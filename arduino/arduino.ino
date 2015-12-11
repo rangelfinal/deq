@@ -2,17 +2,19 @@
 #include <string.h>
 #include <stdlib.h>
 
-String input;
-int fonte1, fonte2, solenoide, executar, contaQuebraLinhas, contaCiclos, contaDes, contaAds, cicloAtual;
+String input, inputteste;
+int fonte1, fonte2, solenoide, executar, contaQuebraLinhas, contaDes, contaAds, cicloAtual;
+int contaCiclos = 0;
 //_______________________________________________________
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(250000);
   Serial1.begin(2400);
 
   while (!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
   input = "";
   contaQuebraLinhas = 0;
 
+  pinMode( 22, INPUT);
   pinMode( 44, OUTPUT);
   pinMode( 45, OUTPUT);
   pinMode( 46, OUTPUT);
@@ -58,48 +60,58 @@ void serialRead() {
   }
 }
 //_______________________________________________________
+String ph = "p0000.00;";
+String temperatura = "t0000.00;";
+String condutividade = "c0000.00;";
+String voltagem = "v0000.00;";
 void serial1Read() {
-  char charRead = Serial1.read();
-  int intRead = (int) charRead;
-  float ph, temperatura, condutividade, voltagem;
-  if (intRead != -1 && intRead != 10 && intRead != 13) {
-    input += charRead;
-  }
-  if (intRead == 10 || intRead == 13) {
-    input += ' ';
-    contaQuebraLinhas++;
-  }
-  else {
-    contaQuebraLinhas = 0;
-  }
-  if (contaQuebraLinhas == 4) {
-    int aux = 0;
-    contaQuebraLinhas = 0;
-    while (input.indexOf('=', aux) >= 0) {
-      aux = input.indexOf('=', aux);
-      String variavel = input.substring(input.lastIndexOf(' ', aux - 2), aux - 1);
-      variavel.trim();
-      variavel.toLowerCase();
-      String valor = input.substring(aux + 1, input.indexOf(' ', aux + 1));
-      valor.trim();
-      valor.toLowerCase();
-      if (variavel == "ph") {
-        ph = valor.toFloat();
-      }
-      else if (variavel == "temperature") {
-        temperatura = valor.toFloat();
-      }
-      else if (variavel == "conductivity") {
-        condutividade = valor.toFloat();
-      }
-      else if (variavel == "voltage") {
-        voltagem = valor.toFloat();
-      }
+  if (Serial1.available() > 0) {
+    char charRead = Serial1.read();
+    int intRead = (int) charRead;
+    if (intRead != -1 && intRead != 10 && intRead != 13) {
+      input += charRead;
     }
-    char* stringFormatada;
-    sprintf(stringFormatada, "p%04.2f;t%04.2f;c%04.2f;v%04.2f;n%07d", ph, temperatura, condutividade, voltagem, contaCiclos);
-    Serial.println(stringFormatada);
-    input = "";
+    if (intRead == 10 || intRead == 13) {
+      input += ';';
+      contaQuebraLinhas++;
+    }
+    else {
+      contaQuebraLinhas = 0;
+    }
+    if (contaQuebraLinhas == 4) {
+      int aux = 0;
+      contaQuebraLinhas = 0;
+      char charBuffer[7];
+      while (aux != -1) {
+        aux = input.indexOf('=', aux+1);
+        String variavel = input.substring(input.lastIndexOf(';', aux-1)+1, aux);
+        variavel.trim();
+        variavel.toLowerCase();
+        String valor = input.substring(aux + 1, input.indexOf(';', aux + 1));
+        valor.trim();
+        valor.toLowerCase();
+        if (variavel == "ph") {
+          dtostrf(valor.toFloat(),7, 2, charBuffer);
+          ph = "p" + String(charBuffer) + ";";
+        }
+        else if (variavel == "temperature") {
+          dtostrf(valor.toFloat(),7, 2, charBuffer);
+          temperatura = "t" + String(charBuffer) + ";";
+        }
+        else if (variavel == "conductivity") {
+          dtostrf(valor.toFloat(),7, 2, charBuffer);
+          condutividade = "c" + String(charBuffer) + ";";
+        }
+        else if (variavel == "voltage") {
+          dtostrf(valor.toFloat(),7, 2, charBuffer);
+          voltagem = "v" + String(charBuffer) + ";";
+        }
+      }
+      dtostrf(contaCiclos,7,0,charBuffer);
+      String contaCiclos = "n" +  String(charBuffer) + ";";
+      Serial.println(ph+temperatura+condutividade+voltagem+contaCiclos);
+      input = "";
+    }
   }
 }
 //_______________________________________________________
