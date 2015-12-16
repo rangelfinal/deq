@@ -60,10 +60,10 @@ void serialRead() {
   }
 }
 //_______________________________________________________
-String ph = "p0000.00;";
-String temperatura = "t0000.00;";
-String condutividade = "c0000.00;";
-String voltagem = "v0000.00;";
+String ph = "p0000.00";
+String temperatura = "t0000.00";
+String condutividade = "c0000.00";
+String voltagem = "v0000.00";
 void serial1Read() {
   if (Serial1.available() > 0) {
     char charRead = Serial1.read();
@@ -92,23 +92,25 @@ void serial1Read() {
         valor.toLowerCase();
         if (variavel == "ph") {
           dtostrf(valor.toFloat(),7, 2, charBuffer);
-          ph = "p" + String(charBuffer) + ";";
-        }
+          ph = "p" + String(charBuffer);
+        } 
         else if (variavel == "temperature") {
           dtostrf(valor.toFloat(),7, 2, charBuffer);
-          temperatura = "t" + String(charBuffer) + ";";
+          temperatura = "t" + String(charBuffer);
         }
         else if (variavel == "conductivity") {
           dtostrf(valor.toFloat(),7, 2, charBuffer);
-          condutividade = "c" + String(charBuffer) + ";";
+          condutividade = "c" + String(charBuffer);
         }
         else if (variavel == "voltage") {
           dtostrf(valor.toFloat(),7, 2, charBuffer);
-          voltagem = "v" + String(charBuffer) + ";";
+          voltagem = "v" + String(charBuffer);
         }
       }
       dtostrf(contaCiclos,7,0,charBuffer);
-      String contaCiclos = "n" +  String(charBuffer) + ";";
+      String contaCiclos = "n" +  String(charBuffer);
+      String result = ph+temperatura+condutividade+voltagem+contaCiclos;
+      result.replace(" ","0");
       Serial.println(ph+temperatura+condutividade+voltagem+contaCiclos);
       input = "";
     }
