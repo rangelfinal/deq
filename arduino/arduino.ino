@@ -7,7 +7,7 @@ int fonte1, fonte2, solenoide, executar, contaQuebraLinhas, contaDes, contaAds, 
 int contaCiclos = 0;
 //_______________________________________________________
 void setup() {
-  Serial.begin(250000);
+  Serial.begin(9600);
   Serial1.begin(2400);
 
   while (!Serial && !Serial1) {} // Espera os seriais ficarem disponiveis
