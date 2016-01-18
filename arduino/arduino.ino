@@ -107,11 +107,14 @@ void serial1Read() {
           voltagem = "v" + String(charBuffer);
         }
       }
+      int vpotencial = map( analogRead(A2) , 0, 1024, 0, 5000);
+      dtostrf(vpotencial,7,0,charBuffer);
+      String sPotencial = "a" + String(charBuffer);
       dtostrf(contaCiclos,7,0,charBuffer);
-      String contaCiclos = "n" +  String(charBuffer);
-      String result = ph+temperatura+condutividade+voltagem+contaCiclos;
+      String sContaCiclos = "n" +  String(charBuffer);
+      String result = ph+temperatura+condutividade+voltagem+sContaCiclos+sPotencial;
       result.replace(" ","0");
-      Serial.println(ph+temperatura+condutividade+voltagem+contaCiclos);
+      Serial.println(result);
       input = "";
     }
   }
