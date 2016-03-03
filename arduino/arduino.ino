@@ -99,7 +99,11 @@ void serial1Read() {
           temperatura = "t" + String(charBuffer);
         }
         else if (variavel == "conductivity") {
-          dtostrf(valor.toFloat(),7, 2, charBuffer);
+          float tempValor = valor.toFloat();
+          if (variavel.indexOf("m") >= 0) {
+            tempValor *= 1000;
+          }
+          dtostrf(tempValor,7, 2, charBuffer);
           condutividade = "c" + String(charBuffer);
         }
         else if (variavel == "voltage") {
