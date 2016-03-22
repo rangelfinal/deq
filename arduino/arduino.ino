@@ -100,7 +100,7 @@ void serial1Read() {
         }
         else if (variavel == "conductivity") {
           float tempValor = valor.toFloat();
-          if (variavel.indexOf("m") >= 0) {
+          if (valor.indexOf("m") >= 0) {
             tempValor *= 1000;
           }
           dtostrf(tempValor,7, 2, charBuffer);
