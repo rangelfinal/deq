@@ -141,6 +141,7 @@ void roda() {
     else {
       digitalWrite( 45, HIGH );
       digitalWrite( 46, HIGH );
+      contaCiclos = 0;
     }
   }
 }
