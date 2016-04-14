@@ -111,7 +111,7 @@ void serial1Read() {
           voltagem = "v" + String(charBuffer);
         }
       }
-      int vpotencial = map( analogRead(A2) , 0, 1024, 0, 5000);
+      int vpotencial = map( analogRead(A0) , 0, 1024, 0, 5000);
       dtostrf(vpotencial,7,0,charBuffer);
       String sPotencial = "a" + String(charBuffer);
       dtostrf(contaCiclos,7,0,charBuffer);
