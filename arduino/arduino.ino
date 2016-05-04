@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 String input, inputteste;
-int fonte1, fonte2, solenoide, executar, contaQuebraLinhas, contaDes, contaAds, cicloAtual;
+int fonte1, fonte2, solenoide, contaQuebraLinhas, cicloAtual;
 int contaCiclos = 0;
 //_______________________________________________________
 void setup() {
@@ -38,25 +38,13 @@ void loop() {
 }
 //_______________________________________________________
 void serialRead() {
-  // Formato da string de entrada: verificadorInicial(8);fonte1(0|1);fonte2(0|1);solenoide(0|1);executar(0|1);verificadorFinal(922)
+  // Formato da string de entrada: fonte1(0|1);fonte2(0|1);solenoide(0|1);
   if (Serial.available() > 0) {
-    float digitoVerificadorInicial = Serial.parseFloat(); // leitura da serial
-    if (digitoVerificadorInicial == 8) { // teste básico(se o primeiro caractere (verificador) é igual a 8
-      fonte1 = Serial.parseFloat();
-      fonte2 = Serial.parseFloat();
-      solenoide = Serial.parseFloat();
-      executar = Serial.parseFloat();
-      float digitoVerificadorFinal = Serial.parseFloat();
-      cleanSerialBuffer();
-      if (digitoVerificadorFinal == 922) { // verifica se o caractere verificador final foi recebido
-        if (executar == 1) {
-          roda();
-        }
-      }
-      else {
-        executar = 0;
-      }
-    }
+    fonte1 = Serial.parseFloat();
+    fonte2 = Serial.parseFloat();
+    solenoide = Serial.parseFloat();
+    cleanSerialBuffer();
+    exec();
   }
 }
 //_______________________________________________________
@@ -124,45 +112,40 @@ void serial1Read() {
   }
 }
 //_______________________________________________________
-void roda() {
-  if (solenoide == 1 ) {
+void exec() {
+  if (solenoide) {
     digitalWrite( 47, LOW );
   }
   else {
     digitalWrite( 47, HIGH );
   }
-  if (fonte1 == 1 ) {
+  
+  if (fonte1) {
     ads();
   }
-  else {
-    if (fonte2 == 1) {
-      des();
-    }
-    else {
-      digitalWrite( 45, HIGH );
-      digitalWrite( 46, HIGH );
-      contaCiclos = 0;
-    }
+  else if (fonte2) {
+    des();
   }
+  else {
+    digitalWrite( 45, HIGH );
+    digitalWrite( 46, HIGH );
+    contaCiclos = 0;
+ }
 }
 //_______________________________________________________
 void des() {
-  contaDes++;
-  contaAds = 0;
   digitalWrite( 45, HIGH );
   digitalWrite( 46, LOW );
-  if (cicloAtual == 0) {
+  if (!cicloAtual) {
     contaCiclos++;
   }
   cicloAtual = 1;
 }
 //_______________________________________________________
 void ads() {
-  contaAds++;
-  contaDes = 0;
   digitalWrite( 45, LOW );
   digitalWrite( 46, HIGH );
-  if (cicloAtual == 1) {
+  if (cicloAtual) {
     contaCiclos++;
   }
   cicloAtual = 0;
