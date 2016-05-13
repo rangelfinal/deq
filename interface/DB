@@ -1,0 +1,25 @@
+DEQDB:
+
+data:
+  datetime: Date
+  value: Number
+  unit: text
+
+interface:
+  ledDesorption: true/false
+  ledAdsorption: true/false
+  ledBatch: true/false
+  ledSinglePass: true/false
+  toggleSingle: true/false
+  toggleOn: true/false
+  toogleAdsorption: true/false
+  textDocument: text
+  timeAdsorption: number
+  timeDesorption: number
+  minConductivityAdsorption: number
+  maxConductivityDesorption: number
+  cutPotentialAdsorption: number
+  cutPotentialDesorption: number
+  numberCicles: number
+  maxConductivity: number
+  mode: number // 1 - potenciostático, 2 - galvanostático tempo, 3 - gavanostático condutividade, 4 - gavanostático potencial, 5 - gavanostático tudo
