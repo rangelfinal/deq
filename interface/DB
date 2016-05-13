@@ -20,6 +20,6 @@ interface:
   maxConductivityDesorption: number
   cutPotentialAdsorption: number
   cutPotentialDesorption: number
-  numberCicles: number
+  numCicles: number
   maxConductivity: number
   mode: number // 1 - potenciostático, 2 - galvanostático tempo, 3 - gavanostático condutividade, 4 - gavanostático potencial, 5 - gavanostático tudo
