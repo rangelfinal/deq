@@ -115,17 +115,17 @@ def ArduinoRead(inicio): #Lê as informações vindas do arduino e salva no DB, 
 
 def potenciostatico():
     tempoestado=inicioestado-timer()
-    if estado = 'Adsorção':
+    if estado == 'Adsorção':
         if tempoestado>=timeAdsorption or condutividade<=minConductivityAdsorption:
             estado='Dessorção'
             inicioestado=timer()
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
-    if estado = 'Dessorção':
+    if estado == 'Dessorção':
         if tempoestado>=timeDesorption or condutividade>=maxConductivityDesorption:
             estado='Adsorção'
             inicioestado=timer()
-            if toggleSingle = True:
+            if toggleSingle == True:
                 serial.write(b'1,0,1')
             else:
                 serial.write(b'1,0,0')
@@ -135,17 +135,17 @@ def potenciostatico():
 
 def GalvanoTempo():
     tempoestado=inicioestado-timer()
-    if estado = 'Adsorção':
+    if estado == 'Adsorção':
         if condutividade<=minConductivityAdsorption:
             estado='Dessorção'
             inicioestado=timer()
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
-        if estado = 'Dessorção':
+        if estado == 'Dessorção':
             if condutividade>=maxConductivityDesorption:
                 estado='Adsorção'
                 inicioestado=timer()
-                if toggleSingle = True:
+                if toggleSingle == True:
                     serial.write(b'1,0,1')
                 else:
                     serial.write(b'1,0,0')
@@ -153,15 +153,15 @@ def GalvanoTempo():
     return inicioestado, estado
 
 def GalvanoCond():
-    if estado = 'Adsorção':
+    if estado == 'Adsorção':
         if tempoestado>=timeAdsorption:
             estado='Dessorção'
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
-        if estado = 'Dessorção':
+        if estado == 'Dessorção':
             if tempoestado>=timeDesorption:
                 estado='Adsorção'
-                if toggleSingle = True:
+                if toggleSingle == True:
                     serial.write(b'1,0,1')
                 else:
                     serial.write(b'1,0,0')
@@ -169,15 +169,15 @@ def GalvanoCond():
         return inicioestado, estado
 
 def GalvanoPot():
-    if estado = 'Adsorção':
+    if estado == 'Adsorção':
         if potencialcelula>=cutPotentialAdsorption:
             estado='Dessorção'
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
-        if estado = 'Dessorção':
+        if estado == 'Dessorção':
             if potencialcelula>=cutPotentialDesorption:
                 estado='Adsorção'
-                if toggleSingle = True:
+                if toggleSingle == True:
                     serial.write(b'1,0,1')
                 else:
                     serial.write(b'1,0,0')
@@ -186,17 +186,17 @@ def GalvanoPot():
 
 def GalvanoGeral():
     tempoestado=inicioestado-timer()
-    if estado = 'Adsorção':
+    if estado == 'Adsorção':
         if tempoestado>=timeAdsorption or condutividade<=minConductivityAdsorption or potencialcelula>=cutPotentialAdsorption:
             estado='Dessorção'
             inicioestado=timer()
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
-    if estado = 'Dessorção':
+    if estado == 'Dessorção':
         if tempoestado>=timeDesorption or condutividade>=maxConductivityDesorption or potencialcelula>=cutPotentialAdsorption:
             estado='Adsorção'
             inicioestado=timer()
-            if toggleSingle = True:
+            if toggleSingle == True:
                 serial.write(b'1,0,1')
             else:
                 serial.write(b'1,0,0')
@@ -225,7 +225,7 @@ def main():
     maxConductivity=interface[12]
     mode = interface[13]
     ########################################################################################
-    if toggleAdsorption = True:
+    if toggleAdsorption == True:
         fonte1 = 1
         fonte2= 0
         estado = 'Adsorção'
@@ -236,7 +236,7 @@ def main():
         estado='Dessorção'
         cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
 
-    if toggleSingle = True:
+    if toggleSingle == True:
         bobina = fonte1
     else:
         bobina=0
@@ -245,7 +245,7 @@ def main():
     inicioestado=timer()#Marca o tempo de início do primeiro estado
     nciclo = 0
 
-    while toggleOn=true and nciclo<numberCicles:
+    while toggleOn==true and nciclo<numberCicles:
 
         time.sleep(1)
         leitura=ArduinoRead(inicio)
@@ -259,21 +259,21 @@ def main():
         cursor.execute(' INSERT INTO python(name, value) VALUES(?,?)', dados)
 
         if condutividade<maxConductivity: #####NÃO FAZ NADA SE A CONDUTIVIDADE FOR MAIOR QUE A MÁXIMA - REVER
-            if mode=1: #Potenciostatico
+            if mode==1: #Potenciostatico
                 aux=potenciostatico()
                 inicioestado = aux[0]
                 estado = aux[1]
 
-            if mode=2: #Galvanostático - tempo
+            if mode==2: #Galvanostático - tempo
                 estado=GalvanoTempo()
 
-            if mode=3: #Galvanostático - condutividade
+            if mode==3: #Galvanostático - condutividade
                 estado=GalvanoCond()
 
-            if mode=4: #galvanostático - potencialcelula
+            if mode==4: #galvanostático - potencialcelula
                 estado = GalvanoPot()
 
-            if mode=5: #galvanostático - geral
+            if mode==5: #galvanostático - geral
                 aux=GalvanoGeral()
                 inicioestado = aux[0]
                 estado = aux[1]
