@@ -1,6 +1,6 @@
 import sqlite3
-import time
-inicio = timer()  #Marca o início da execução
+from timeit import Timer
+inicio = Timer()  #Marca o início da execução
 db=sqlite3.connect('DEQ.sqlite') #Conecta ao banco de dados
 cursor=db.cursor()
 
@@ -100,7 +100,7 @@ def ArduinoRead(inicio): #Lê as informações vindas do arduino e salva no DB, 
         if (entrada[i]=='t'):
             temperatura=int(entrada[i+1:i+8])
 
-    agora = timer()
+    agora = Timer()
     tempo = inicio - agora
 
     dados = [('condutividade',condutividade, tempo),
@@ -114,17 +114,17 @@ def ArduinoRead(inicio): #Lê as informações vindas do arduino e salva no DB, 
     return condutividade, ph, potencialcelula, nciclo, temperatura
 
 def potenciostatico():
-    tempoestado=inicioestado-timer()
+    tempoestado=inicioestado-Timer()
     if estado == 'Adsorção':
         if tempoestado>=timeAdsorption or condutividade<=minConductivityAdsorption:
             estado='Dessorção'
-            inicioestado=timer()
+            inicioestado=Timer()
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
     if estado == 'Dessorção':
         if tempoestado>=timeDesorption or condutividade>=maxConductivityDesorption:
             estado='Adsorção'
-            inicioestado=timer()
+            inicioestado=Timer()
             if toggleSingle == True:
                 serial.write(b'1,0,1')
             else:
@@ -134,17 +134,17 @@ def potenciostatico():
 
 
 def GalvanoTempo():
-    tempoestado=inicioestado-timer()
+    tempoestado=inicioestado-Timer()
     if estado == 'Adsorção':
         if condutividade<=minConductivityAdsorption:
             estado='Dessorção'
-            inicioestado=timer()
+            inicioestado=Timer()
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
         if estado == 'Dessorção':
             if condutividade>=maxConductivityDesorption:
                 estado='Adsorção'
-                inicioestado=timer()
+                inicioestado=Timer()
                 if toggleSingle == True:
                     serial.write(b'1,0,1')
                 else:
@@ -185,17 +185,17 @@ def GalvanoPot():
         return estado
 
 def GalvanoGeral():
-    tempoestado=inicioestado-timer()
+    tempoestado=inicioestado-Timer()
     if estado == 'Adsorção':
         if tempoestado>=timeAdsorption or condutividade<=minConductivityAdsorption or potencialcelula>=cutPotentialAdsorption:
             estado='Dessorção'
-            inicioestado=timer()
+            inicioestado=Timer()
             serial.write(b'0,1,0')
             cursor.execute(' INSERT INTO python(name, value) VALUES(estado,0)')
     if estado == 'Dessorção':
         if tempoestado>=timeDesorption or condutividade>=maxConductivityDesorption or potencialcelula>=cutPotentialAdsorption:
             estado='Adsorção'
-            inicioestado=timer()
+            inicioestado=Timer()
             if toggleSingle == True:
                 serial.write(b'1,0,1')
             else:
@@ -242,7 +242,7 @@ def main():
         bobina=0
     ser.write(fonte1,fonte2,bobina) #Inicia o Arduino no estado correto
 
-    inicioestado=timer()#Marca o tempo de início do primeiro estado
+    inicioestado=Timer()#Marca o tempo de início do primeiro estado
     nciclo = 0
 
     while toggleOn==true and nciclo<numberCicles:
@@ -253,7 +253,7 @@ def main():
         ph = leitura[1]
         potencialcelula = leitura[2]
         nciclo = leitura[3]
-        agora=timer()
+        agora=Timer()
         agora=inicio-agora
         dados=['tempo',agora]
         cursor.execute(' INSERT INTO python(name, value) VALUES(?,?)', dados)
