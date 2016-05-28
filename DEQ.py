@@ -1,18 +1,38 @@
 import sqlite3
 from timeit import Timer
 inicio = Timer()  #Marca o início da execução
-db=sqlite3.connect('DEQ.sqlite') #Conecta ao banco de dados
+db = sqlite3.connect('DEQ.sqlite') #Conecta ao banco de dados
 
-def SaveToArduinoTable():
+def SaveToArduinoTable(dataToSave):
+    cursor = db.cursor()
+    settings = readSettingsFromDB()
+    sqlStringTemplate = ('''INSERT INTO'
+        'arduino(variableID, value, modeID, fonte1, fonte2, solenoide)'
+        'VALUES(?,?,?,?,?,?)''')
+
+    for data in dataToSave:
+        try:
+            cursor.execute(sqlStringTemplate, data, settings.modeID, settings.fonte1, settings.fonte2, settings.solenoide)
+        except Exception as e:
+            raise
+
     return true
 
 #Salva os dados provenientes da interface (que estarão no banco de dados) em variáveis do Python
-def InterfaceToPython():
+def readSettingsFromDB():
     cursor = db.cursor().execute('SELECT * FROM settings')
     columns = [column[0] for column in cursor.description]
     row = cursor.fetchone()
     result = dict(zip(columns, row))
     return result
+
+# Salva uma alteração das configurações no banco de dados
+def changeSetting(name, newValue):
+    try:
+        cursor = db.cursor().execute('UPDATE arduino SET ' + name '=' + newValue)
+    except Exception as e:
+        return false
+    return true
 
 #Função que setará o Arduino, escolhendo automaticamnte a porta em que ele está conectado e abrindo a sessão
 def ArduinoSetup():
@@ -55,7 +75,8 @@ def ArduinoSetup():
 
     return ser
 
-def ArduinoRead(inicio): #Lê as informações vindas do arduino e salva no DB, o tempo de início da execução é o argumento
+#Lê as informações vindas do arduino e salva no DB, o tempo de início da execução é o argumento
+def ArduinoRead(inicio):
 
     entrada = ser.readline() #atribui à variável entrada uma linha vinda do Arduino
 
@@ -71,16 +92,13 @@ def ArduinoRead(inicio): #Lê as informações vindas do arduino e salva no DB, 
         if (entrada[i]=='t'):
             temperatura=int(entrada[i+1:i+8])
 
-    agora = Timer()
-    tempo = inicio - agora
+    data = [(1, condutividade),
+             (2, pH),
+             (3, potencialcelula),
+             (4, nciclo),
+             (5, temperatura)]
 
-    dados = [('condutividade',condutividade, tempo),
-             ('pH',pH, tempo),
-             ('potencialcelula', potencialcelula, tempo),
-             ('nciclo', nciclo, tempo),
-             ('temperatura', temperatura, tempo)]
-
-    cursor.executemany(''' INSERT INTO arduino(name, value, time) VALUES(?,?,?)''', dados) #Insere dados no banco de dados
+    SaveToArduinoTable(data)
 
     return condutividade, ph, potencialcelula, nciclo, temperatura
 
