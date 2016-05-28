@@ -36,13 +36,9 @@ def InterfaceToPython(): #Salva os dados provenientes da interface (que estarão
     return toggleSingle, toggleOn, toggleAdsorption, textDocument, timeAdsorption, timeDesorption, minConductivityAdsorption, maxConductivityDesorption,minConductivityAdsorption,cutPotentialAdsorption, cutPotentialDesorption,numberCicles,maxConductivity, mode
 
 def ArduinoSetup(): ####Função que setará o Arduino, escolhendo automaticamnte a porta em que ele está conectado e abrindo a sessão
-    #######Código roubado, testar!########
-    #######O Arduino dele "chama" "CH340" é necessário verificar o "nome" da nossa e mudar no código"
 
-    import pySerial
     import serial
     import sys
-    #import time
     import serial.tools.list_ports
 
     #serPort = ""
@@ -52,28 +48,26 @@ def ArduinoSetup(): ####Função que setará o Arduino, escolhendo automaticamnt
 
     # Find Live Ports
     ports = list(serial.tools.list_ports.comports())
-    #for p in ports:
-        #print p # This causes each port's information to be printed out. Usar para achar o nome da nossa placa
+    for p in ports:
            # To search this p data, use p[1].
 
-    while int1 < 9:   # Loop checks "COM0" to "COM8" for Adruino Port Info.
+        while int1 < 9:   # Loop checks "COM0" to "COM8" for Adruino Port Info.
 
-        if "CH340" in p[1]:  # Looks for "CH340" in P[1].
-            str2 = str(int1) # Converts an Integer to a String, allowing:
-            str1 = "COM" + str2 # add the strings together.
+            if "CH340" in p[1]:  # Looks for "CH340" in P[1].
+                str2 = str(int1) # Converts an Integer to a String, allowing:
+                str1 = "COM" + str2 # add the strings together.
 
-        if "CH340" in p[1] and str1 in p[1]: # Looks for "CH340" and "COM#"
-            #print "Found Arduino Uno on " + str1
-            int1 = 9 # Causes loop to end.
+            if "CH340" in p[1] and str1 in p[1]: # Looks for "CH340" and "COM#"
+                #print "Found Arduino Uno on " + str1
+                int1 = 9 # Causes loop to end.
 
-        if int1 == 8:
-            print ("Arduino not found!")
-            sys.exit() # Terminates Script.
+            if int1 == 8:
+                print ("Arduino not found!")
+                sys.exit() # Terminates Script.
 
-        int1 = int1 + 1
+            int1 = int1 + 1
 
         #time.sleep(5)  # Gives user 5 seconds to view Port information -- can be   changed/removed.
-
     # Set Port
     ser = serial.Serial(str1, 9600, timeout=10) # Put in your speed and timeout value.
 
