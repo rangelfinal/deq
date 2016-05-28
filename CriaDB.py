@@ -2,7 +2,16 @@ import sqlite3
 
 db= sqlite3.connect('DEQ.sqlite')
 cursor = db.cursor()
-cursor.execute('CREATE TABLE arduino(name text, value real, time integer)')
-cursor.execute('CREATE TABLE interface(name text, value real)')
-cursor.execute('CREATE TABLE python(name text, value real)')
+
+fd = open('createDB.sql', 'r')
+sqlFile = df.read()
+fd.close()
+
+sqlCommands = sqlFile.split(';')
+for command in sqlCommands:
+    try:
+        cursor.execute(command)
+    except Exception as e:
+        raise
+
 db.commit()
