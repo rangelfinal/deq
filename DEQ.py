@@ -4,34 +4,16 @@ inicio = Timer()  #Marca o início da execução
 db=sqlite3.connect('DEQ.sqlite') #Conecta ao banco de dados
 cursor=db.cursor()
 
+def SaveToArduinoTable():
+    return true
+
 def InterfaceToPython(): #Salva os dados provenientes da interface (que estarão no banco de dados) em variáveis do Python
 
-    cursor.execute('SELECT value FROM interface WHERE name=toggleSingle')
-    toggleSingle = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=toggleOn')
-    toggleOn = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=toggleAdsorption')
-    toggleAdsorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=textDocument')
-    textDocument = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=timeAdsorption')
-    timeAdsorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=timeDesorption')
-    timeDesorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=minConductivityAdsorption')
-    minConductivityAdsorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=maxConductivityDesorption')
-    maxConductivityDesorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=cutPotentialAdsorption')
-    cutPotentialAdsorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=cutPotentialDesorption')
-    cutPotentialDesorption = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=numberCicles')
-    numberCicles = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=maxConductivity')
-    maxConductivity = cursor.fetchone()
-    cursor.execute('SELECT value FROM interface WHERE name=mode')
-    mode = cursor.fetchone()
+    cursos.execute('SELECT * FROM settings')
+    columns = [column[0] for column in cursor.description]
+    row = cursor.fetchone()
+    result = dict(zip(columns, row))
+    return result
 
     return toggleSingle, toggleOn, toggleAdsorption, textDocument, timeAdsorption, timeDesorption, minConductivityAdsorption, maxConductivityDesorption,minConductivityAdsorption,cutPotentialAdsorption, cutPotentialDesorption,numberCicles,maxConductivity, mode
 
