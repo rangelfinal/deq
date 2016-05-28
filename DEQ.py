@@ -2,20 +2,17 @@ import sqlite3
 from timeit import Timer
 inicio = Timer()  #Marca o início da execução
 db=sqlite3.connect('DEQ.sqlite') #Conecta ao banco de dados
-cursor=db.cursor()
 
 def SaveToArduinoTable():
     return true
 
 def InterfaceToPython(): #Salva os dados provenientes da interface (que estarão no banco de dados) em variáveis do Python
 
-    cursos.execute('SELECT * FROM settings')
+    cursor = db.cursor().execute('SELECT * FROM settings')
     columns = [column[0] for column in cursor.description]
     row = cursor.fetchone()
     result = dict(zip(columns, row))
     return result
-
-    return toggleSingle, toggleOn, toggleAdsorption, textDocument, timeAdsorption, timeDesorption, minConductivityAdsorption, maxConductivityDesorption,minConductivityAdsorption,cutPotentialAdsorption, cutPotentialDesorption,numberCicles,maxConductivity, mode
 
 def ArduinoSetup(): ####Função que setará o Arduino, escolhendo automaticamnte a porta em que ele está conectado e abrindo a sessão
     #######Código roubado, testar!########
