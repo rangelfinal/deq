@@ -6,34 +6,28 @@ db=sqlite3.connect('DEQ.sqlite') #Conecta ao banco de dados
 def SaveToArduinoTable():
     return true
 
-def InterfaceToPython(): #Salva os dados provenientes da interface (que estarão no banco de dados) em variáveis do Python
-
+#Salva os dados provenientes da interface (que estarão no banco de dados) em variáveis do Python
+def InterfaceToPython():
     cursor = db.cursor().execute('SELECT * FROM settings')
     columns = [column[0] for column in cursor.description]
     row = cursor.fetchone()
     result = dict(zip(columns, row))
     return result
 
-def ArduinoSetup(): ####Função que setará o Arduino, escolhendo automaticamnte a porta em que ele está conectado e abrindo a sessão
-    #######Código roubado, testar!########
-    #######O Arduino dele "chama" "CH340" é necessário verificar o "nome" da nossa e mudar no código"
+#Função que setará o Arduino, escolhendo automaticamnte a porta em que ele está conectado e abrindo a sessão
+def ArduinoSetup():
 
     import pySerial
     import serial
     import sys
-    #import time
     import serial.tools.list_ports
 
-    #serPort = ""
     int1 = 0
     str1 = ""
     str2 = ""
 
     # Find Live Ports
     ports = list(serial.tools.list_ports.comports())
-    #for p in ports:
-        #print p # This causes each port's information to be printed out. Usar para achar o nome da nossa placa
-           # To search this p data, use p[1].
 
     while int1 < 9:   # Loop checks "COM0" to "COM8" for Adruino Port Info.
 
@@ -50,8 +44,6 @@ def ArduinoSetup(): ####Função que setará o Arduino, escolhendo automaticamnt
             sys.exit() # Terminates Script.
 
         int1 = int1 + 1
-
-        #time.sleep(5)  # Gives user 5 seconds to view Port information -- can be   changed/removed.
 
     # Set Port
     ser = serial.Serial(str1, 9600, timeout=10) # Put in your speed and timeout value.
