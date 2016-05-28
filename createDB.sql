@@ -35,6 +35,15 @@ INSERT INTO arduinoModes('modeID', 'name') VALUES
   (4, 'Galvanostático por Potencial'),
   (5, 'Galvanostático Geral');
 
+CREATE TABLE arduinoStates(
+  stateID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  name TEXT
+);
+
+INSERT INTO arduinoStates('stateID', 'name') VALUES
+  (1, 'Adsorção'),
+  (2, 'Dessorção');
+
 CREATE TABLE settings(
   toggleSingle BOOLEAN,
   toggleOn BOOLEAN,
@@ -51,7 +60,8 @@ CREATE TABLE settings(
   modeID INTEGER,
   fonte1 BOOLEAN,
   fonte2 BOOLEAN,
-  solenoide BOOLEAN
-)
+  solenoide BOOLEAN,
+  stateID INTEGER
+);
 
 CREATE TABLE
