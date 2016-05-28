@@ -48,7 +48,10 @@ CREATE TABLE settings(
   cutPotentialDesorption REAL,
   numberCicles INTEGER,
   maxConductivity REAL,
-  modeID INTEGER
+  modeID INTEGER,
+  fonte1 BOOLEAN,
+  fonte2 BOOLEAN,
+  solenoide BOOLEAN
 )
 
 CREATE TABLE
