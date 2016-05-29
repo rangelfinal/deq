@@ -3,52 +3,28 @@ var router = express.Router();
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database(':memory:');
 
-router.post('/interface', (req, res, next) => {
-  res.send(select('interface'));
+router.post('/db/:table', (req, res) => {
+  res.send(select(req.params.table));
 });
 
-router.post('/interface/:id', (req, res, next) => {
-  res.send(selectOne('interface', null, 'ID = ' + req.params[0]));
+router.post('/db/:table/select', (req,res) => {
+  res.send(select(req.params.table, req.body.columns, req.body.conditions));
 });
 
-router.post('/interface/insert', (req, res, next) => {
-  res.send(insert('interface', req.body.values, req.body.columns));
+router.post('/db/:table/selectOne', (req,res) => {
+  res.send(selectOne(req.params.table, req.body.columns, req.body.conditions));
 });
 
-router.post('/interface/update', (req, res, next) => {
-  res.send(update('interface', req.body.values, req.body.conditions));
+router.post('/db/:table/:id', (req, res) => {
+  res.send(selectOne(req.params.table, req.body.columns, 'ID = ' + req.params.id));
 });
 
-router.post('/python', (req, res, next) => {
-  res.send(select('python'));
+router.post('/db/:table/insert', (req, res) => {
+  res.send(insert(req.params.table, req.body.values, req.body.columns));
 });
 
-router.post('/python/:id', (req, res, next) => {
-  res.send(selectOne('python', null, 'ID = ' + req.params[0]));
-});
-
-router.post('/python/insert', (req, res, next) => {
-  res.send(insert('python', req.body.values, req.body.columns));
-});
-
-router.post('/python/update', (req, res, next) => {
-  res.send(update('python', req.body.values, req.body.conditions));
-});
-
-router.post('/arduino', (req, res, next) => {
-  res.send(select('arduino'));
-});
-
-router.post('/arduino/:id', (req, res, next) => {
-  res.send(selectOne('arduino', null, 'ID = ' + req.params[0]));
-});
-
-router.post('/arduino/insert', (req, res, next) => {
-  res.send(insert('arduino', req.body.values, req.body.columns));
-});
-
-router.post('/arduino/update', (req, res, next) => {
-  res.send(update('arduino', req.body.values, req.body.conditions));
+router.post('db/:table/update', (req, res) => {
+  res.send(update(req.params.table, req.body.values, req.body.conditions));
 });
 
 /**
