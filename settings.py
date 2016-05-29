@@ -6,11 +6,16 @@ class Settings:
     def __init__(self):
         updateFromDB()
 
-    def updateFromDB():
-        cursor = db.cursor().execute('SELECT * FROM settings')
-        columns = [column[0] for column in cursor.description]
-        row = cursor.fetchone()
-        self = dict(zip(columns, row))
+    def updateFromDB(column=None):
+        if column == None:
+            cursor = db.cursor().execute('SELECT * FROM settings')
+            columns = [column[0] for column in cursor.description]
+            row = cursor.fetchone()
+            self = dict(zip(columns, row))
+        else:
+            cursor = db.cursor().execute('SELECT column FROM settings')
+            row = cursor.fetchone()
+            setattr(self, column, row['column'])
 
     def updateDB(column=None, newValue=None):
         if column == None or newValue == None:
@@ -21,7 +26,7 @@ class Settings:
 
     @property
     def toggleSingle(self):
-        updateFromDB()
+        updateFromDB('toggleSingle')
         return self._toggleSingle
 
     @toggleSingle.setter
@@ -31,7 +36,7 @@ class Settings:
 
     @property
     def toggleOn(self):
-        updateFromDB()
+        updateFromDB('toggleOn')
         return self._toggleOn
 
     @toggleOn.setter
@@ -41,7 +46,7 @@ class Settings:
 
     @property
     def toggleAdsorption(self):
-        updateFromDB()
+        updateFromDB('toggleAdsorption')
         return self._toggleAdsorption
 
     @toggleAdsorption.setter
@@ -51,7 +56,7 @@ class Settings:
 
     @property
     def textDocument(self):
-        updateFromDB()
+        updateFromDB('textDocument')
         return self._textDocument
 
     @textDocument.setter
@@ -61,7 +66,7 @@ class Settings:
 
     @property
     def timeAdsorption(self):
-        updateFromDB()
+        updateFromDB('timeAdsorption')
         return self._timeAdsorption
 
     @timeAdsorption.setter
@@ -71,7 +76,7 @@ class Settings:
 
     @property
     def timeDesorption(self):
-        updateFromDB()
+        updateFromDB('timeDesorption')
         return self._timeDesorption
 
     @timeDesorption.setter
@@ -81,7 +86,7 @@ class Settings:
 
     @property
     def minConductivityAdsorption(self):
-        updateFromDB()
+        updateFromDB('minConductivityAdsorption')
         return self._minConductivityAdsorption
 
     @minConductivityAdsorption.setter
@@ -91,7 +96,7 @@ class Settings:
 
     @property
     def maxConductivityDesorption(self):
-        updateFromDB()
+        updateFromDB('maxConductivityDesorption')
         return self._maxConductivityDesorption
 
     @maxConductivityDesorption.setter
@@ -101,7 +106,7 @@ class Settings:
 
     @property
     def cutPotentialAdsorption(self):
-        updateFromDB()
+        updateFromDB('cutPotentialAdsorption')
         return self._cutPotentialAdsorption
 
     @cutPotentialAdsorption.setter
@@ -111,7 +116,7 @@ class Settings:
 
     @property
     def cutPotentialDesorption(self):
-        updateFromDB()
+        updateFromDB('cutPotentialDesorption')
         return self._cutPotentialDesorption
 
     @cutPotentialDesorption.setter
@@ -121,7 +126,7 @@ class Settings:
 
     @property
     def numberCicles(self):
-        updateFromDB()
+        updateFromDB('numberCicles')
         return self._numberCicles
 
     @numberCicles.setter
@@ -131,7 +136,7 @@ class Settings:
 
     @property
     def maxConductivity(self):
-        updateFromDB()
+        updateFromDB('maxConductivity')
         return self._maxConductivity
 
     @maxConductivity.setter
@@ -141,7 +146,7 @@ class Settings:
 
     @property
     def modeID(self):
-        updateFromDB()
+        updateFromDB('modeID')
         return self._modeID
 
     @modeID.setter
@@ -151,7 +156,7 @@ class Settings:
 
     @property
     def fonte1(self):
-        updateFromDB()
+        updateFromDB('fonte1')
         return self._fonte1
 
     @fonte1.setter
@@ -161,7 +166,7 @@ class Settings:
 
     @property
     def fonte2(self):
-        updateFromDB()
+        updateFromDB('fonte2')
         return self._fonte2
 
     @fonte2.setter
@@ -171,7 +176,7 @@ class Settings:
 
     @property
     def solenoide(self):
-        updateFromDB()
+        updateFromDB('solenoide')
         return self._solenoide
 
     @solenoide.setter
@@ -181,7 +186,7 @@ class Settings:
 
     @property
     def stateID(self):
-        updateFromDB()
+        updateFromDB('stateID')
         return self._stateID
 
     @stateID.setter
