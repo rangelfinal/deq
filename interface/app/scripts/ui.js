@@ -1,3 +1,5 @@
+'use strict';
+
 $(document)
   .ready(function() {
     $('.ui.toggle.onoff.button')
