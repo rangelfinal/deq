@@ -1,5 +1,5 @@
 db = sqlite3.connect('DEQ.sqlite')
-
+import time
 
 class Settings:
 
@@ -193,3 +193,16 @@ class Settings:
     def stateID(self, value):
         updateDB('stateID', value)
         self._stateID = value
+
+    @property
+    def stateStartTime(self):
+        updateFromDB('stateStartTime')
+        return self._stateStartTime
+
+    @stateStartTime.setter
+    def stateStartTime(self, value):
+        updateDB('stateStartTime', value)
+        self._stateStartTime = value
+
+    def timeInCurrentState(self):
+        return time.time() - self.stateStartTime
