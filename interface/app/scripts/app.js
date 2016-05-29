@@ -32,6 +32,11 @@ angular
         controller: 'AboutCtrl',
         controllerAs: 'about'
       })
+      .when('/interface', {
+        templateUrl: 'views/interface',
+        controller: 'InterfaceCtrl',
+        controllerAs: 'interface'
+      })
       .otherwise({
         redirectTo: '/'
       });
