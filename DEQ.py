@@ -1,7 +1,9 @@
 import sqlite3
+import settings
 from timeit import Timer
 inicio = Timer()  # Marca o início da execução
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
+settings = dict()
 
 
 def SaveToArduinoTable(dataToSave):
@@ -118,6 +120,9 @@ def ArduinoRead(inicio):
 
     return condutividade, ph, potencialcelula, nciclo, temperatura
 
+def changeState():
+    if settings.stateID == 1
+        change settings
 
 def potenciostatico():
     tempoestado = inicioestado - Timer()
