@@ -25,7 +25,7 @@ angular.module('interfaceApp')
         </div>\
       </div>',
       restrict: 'E',
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope, element) {
         element.text('this is the inlineField directive');
       }
     };

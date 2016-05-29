@@ -14,7 +14,7 @@ angular.module('interfaceApp')
         chart-click="onClick" >\
       </canvas> ',
       restrict: 'E',
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope, element) {
         element.text('this is the conductivityPlot directive');
       }
     };
