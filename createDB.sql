@@ -61,7 +61,8 @@ CREATE TABLE settings(
   fonte1 BOOLEAN,
   fonte2 BOOLEAN,
   solenoide BOOLEAN,
-  stateID INTEGER
+  stateID INTEGER,
+  stateStartTime DATETIME
 );
 
 CREATE TABLE
