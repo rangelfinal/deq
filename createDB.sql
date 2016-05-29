@@ -64,5 +64,3 @@ CREATE TABLE settings(
   stateID INTEGER,
   stateStartTime DATETIME
 );
-
-CREATE TABLE
