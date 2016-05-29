@@ -1,6 +1,7 @@
 import sqlite3
 import settings
 from timeit import Timer
+
 inicio = Timer()  # Marca o início da execução
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
 settings = dict()
@@ -49,7 +50,6 @@ def changeSetting(column, newValue):
 
 def ArduinoSetup():
 
-    import pySerial
     import serial
     import sys
     import serial.tools.list_ports
@@ -60,8 +60,9 @@ def ArduinoSetup():
 
     # Find Live Ports
     ports = list(serial.tools.list_ports.comports())
+    for p in ports:
 
-    while int1 < 9:   # Loop checks "COM0" to "COM8" for Adruino Port Info.
+        while int1 < 9:   # Loop checks "COM0" to "COM8" for Adruino Port Info.
 
         if "CH340" in p[1]:  # Looks for "CH340" in P[1].
             str2 = str(int1)  # Converts an Integer to a String, allowing:
@@ -74,8 +75,7 @@ def ArduinoSetup():
         if int1 == 8:
             print ("Arduino not found!")
             sys.exit()  # Terminates Script.
-
-        int1 = int1 + 1
+            int1 = int1 + 1
 
     # Set Port
     # Put in your speed and timeout value.
