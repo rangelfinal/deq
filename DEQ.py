@@ -8,6 +8,7 @@ db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
 settingsObj = Settings()
 valuesFromArduino = {}
 
+
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
     sqlStringTemplate = ('''INSERT INTO'
@@ -25,6 +26,8 @@ def SaveToArduinoTable(dataToSave):
 
 # Função que setará o Arduino, escolhendo automaticamnte a porta em que
 # ele está conectado e abrindo a sessão
+
+
 def ArduinoSetup():
 
     int1 = 0
@@ -63,6 +66,8 @@ def ArduinoSetup():
 
 # Lê as informações vindas do arduino e salva no DB, o tempo de início da
 # execução é o argumento
+
+
 def ArduinoRead():
 
     entrada = ser.readline()  # atribui à variável entrada uma linha vinda do Arduino
@@ -75,7 +80,8 @@ def ArduinoRead():
         if (entrada[i] == 'p'):
             valuesFromArduino['pH'] = int(entrada[i + 1:i + 8])
         if (entrada[i] == 'a'):
-            valuesFromArduino['potencialcelula'] = int(entrada[i + 1:i + 8])  # Potencial de Célula
+            valuesFromArduino['potencialcelula'] = int(
+                entrada[i + 1:i + 8])  # Potencial de Célula
         if (entrada[i] == 'n'):
             valuesFromArduino['nciclo'] = int(entrada[i + 1:i + 8])
         if (entrada[i] == 't'):
@@ -90,6 +96,7 @@ def ArduinoRead():
     SaveToArduinoTable(data)
 
     return condutividade, ph, potencialcelula, nciclo, temperatura
+
 
 def changeState():
     settings.stateStartTime = timer.timer()
@@ -137,19 +144,26 @@ def shouldChangeStates(triggers):
 
 
 def potenciostatico():
-    triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption', 'maxConductivityDesorption']
+    triggers = ['timeAdsorption', 'timeDesorption',
+                'minConductivityAdsorption', 'maxConductivityDesorption']
+
 
 def GalvanoTempo():
     triggers = ['timeAdsorption', 'timeDesorption']
 
+
 def GalvanoCond():
     triggers = ['minConductivityAdsorption', 'maxConductivityDesorption']
+
 
 def GalvanoPot():
     triggers = ['cutPotentialAdsorption', 'cutPotentialDesorption']
 
+
 def GalvanoGeral():
-    triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption', 'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
+    triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption',
+                'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
+
 
 def main():
     ser = ArduinoSetup()
@@ -165,9 +179,11 @@ def main():
 
     settings.solenoide = settings.toggleSingle
 
-    ser.write(settings.fonte1, settings.fonte2, settings.solenoide)  # Inicia o Arduino no estado correto
+    # Inicia o Arduino no estado correto
+    ser.write(settings.fonte1, settings.fonte2, settings.solenoide)
 
-    settings.stateStartTime = time.time()  # Marca o tempo de início do primeiro estado
+    # Marca o tempo de início do primeiro estado
+    settings.stateStartTime = time.time()
 
     if settingss.modeID == 1:  # Potenciostatico
         potenciostatico()
