@@ -1,5 +1,5 @@
-import ../settings
-import ../DEQ
+import settings
+import DEQ
 
 try:
     import tkinter
@@ -170,35 +170,35 @@ class simpleapp_tk(tkinter.Tk):
         DEQ.main()
 
     def changeMode(self):
-        if self.config['modeID'] = 1:
+        if self.config['modeID'] == 1:
             for opt in self.timeOptions:
                 opt['state'] = 'normal'
             for opt in self.conductivityOptions:
                 opt['state'] = 'normal'
             for opt in self.potentialOptions:
                 opt['state'] = 'disabled'
-        elif self.config['modeID'] = 2:
+        elif self.config['modeID'] == 2:
             for opt in self.timeOptions:
                 opt['state'] = 'normal'
             for opt in self.conductivityOptions:
                 opt['state'] = 'disabled'
             for opt in self.potentialOptions:
                 opt['state'] = 'disabled'
-        elif self.config['modeID'] = 3:
+        elif self.config['modeID'] == 3:
             for opt in self.timeOptions:
                 opt['state'] = 'disabled'
             for opt in self.conductivityOptions:
                 opt['state'] = 'normal'
             for opt in self.potentialOptions:
                 opt['state'] = 'disabled'
-        elif self.config['modeID'] = 4:
+        elif self.config['modeID'] == 4:
             for opt in self.timeOptions:
                 opt['state'] = 'disabled'
             for opt in self.conductivityOptions:
                 opt['state'] = 'disabled'
             for opt in self.potentialOptions:
                 opt['state'] = 'normal'
-        elif self.config['modeID'] = 5:
+        elif self.config['modeID'] == 5:
             for opt in self.timeOptions:
                 opt['state'] = 'normal'
             for opt in self.conductivityOptions:
