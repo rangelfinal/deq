@@ -211,5 +211,3 @@ def main():
             changeState()
 
     ser.write(b'0,0,0')
-
-main()
