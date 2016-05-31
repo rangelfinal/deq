@@ -1,4 +1,5 @@
-import .. / settings
+import ../settings
+import ../DEQ
 
 try:
     import tkinter
@@ -166,6 +167,7 @@ class simpleapp_tk(tkinter.Tk):
         configToSave = {}
         for key, value in self.config:
             configToSave[config] = value.get()
+        DEQ.main()
 
     def changeMode(self):
         if self.config['modeID'] = 1:
