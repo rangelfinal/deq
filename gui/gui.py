@@ -142,7 +142,7 @@ class simpleapp_tk(tkinter.Tk):
             for opt in self.timeOptions:
                 opt['state'] = 'disabled'
             for opt in self.conductivityOptions:
-                opt['state'] = 'enabled'
+                opt['state'] = 'normal'
             for opt in self.potentialOptions:
                 opt['state'] = 'disabled'
         elif self.config['modeID'] = 4:
@@ -151,7 +151,7 @@ class simpleapp_tk(tkinter.Tk):
             for opt in self.conductivityOptions:
                 opt['state'] = 'disabled'
             for opt in self.potentialOptions:
-                opt['state'] = 'enabled'
+                opt['state'] = 'normal'
         elif self.config['modeID'] = 5:
             for opt in self.timeOptions:
                 opt['state'] = 'normal'
