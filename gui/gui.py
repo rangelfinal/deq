@@ -51,6 +51,7 @@ class simpleapp_tk(tkinter.Tk):
         self.modeRadio = tkinter.Radiobutton(self, text="Galvanostático Geral", variable = self.config['modeID'], value=5, command=self.changeMode)
 
         self.leftPanel = tkinter.Frame(self, relief=RAISED, borderwidth=1)
+        self.leftPanel.grid(column=0,row=0)
 
         self.toggleSingleLabel = tkinter.Label(self.leftPanel, text="Single-Pass")
         self.toggleSingleLabel.grid(column=0,row=1)
@@ -115,6 +116,9 @@ class simpleapp_tk(tkinter.Tk):
 
         self.toggleOn = tkinter.Button(self,text="Ligar",command=self.saveConfig)
         self.toggleOn.grid(column=0,colspan=2,row=12,stick='EW')
+
+        self.graphPanel = tkinter.Frame(self)
+        self.graphPanel.grid(column=1, row=0, colspan=5)
 
 
     def saveConfig(self):
