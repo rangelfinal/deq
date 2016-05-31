@@ -69,50 +69,49 @@ class simpleapp_tk(tkinter.Tk):
 
         self.timeOptions = {}
 
-        self.timeOptions['timeAdsorptionLabel'] = tkinter.Label(self.leftPanel, text="timeAdsorption")
+        self.timeOptions['timeAdsorptionLabel'] = tkinter.Label(self.leftPanel, text="Tempo - Adsorção")
         self.timeOptions['timeAdsorptionLabel'].grid(column=0,row=4)
         self.timeOptions['timeAdsorption'] = tkinter.Entry(self.leftPanel,textVariable=self.config['timeAdsorption'])
         self.timeOptions['timeAdsorption'].grid(column=1,row=4,stick='EW')
 
-        self.timeOptions['timeDesorptionLabel'] = tkinter.Label(self.leftPanel, text="timeDesorption")
+        self.timeOptions['timeDesorptionLabel'] = tkinter.Label(self.leftPanel, text="Tempo - Dessorção")
         self.timeOptions['timeDesorptionLabel'].grid(column=0,row=5)
         self.timeOptions['timeDesorption'] = tkinter.Entry(self.leftPanel,textVariable=self.config['timeDesorption'])
         self.timeOptions['timeDesorption'].grid(column=1,row=5,stick='EW')
 
         self.conductivityOptions = {}
 
-        self.conductivityOptions['minConductivityAdsorptionLabel'] = tkinter.Label(self.leftPanel, text="minConductivityAdsorption")
+        self.conductivityOptions['minConductivityAdsorptionLabel'] = tkinter.Label(self.leftPanel, text="Condutividade Minima - Adsorção")
         self.conductivityOptions['minConductivityAdsorptionLabel'].grid(column=0,row=6)
         self.conductivityOptions['minConductivityAdsorption'] = tkinter.Entry(self.leftPanel,textVariable=self.config['minConductivityAdsorption'])
         self.conductivityOptions['minConductivityAdsorption'].grid(column=1,row=6,stick='EW')
 
-        self.conductivityOptions['maxConductivityDesorptionLabel'] = tkinter.Label(self.leftPanel, text="maxConductivityDesorption")
+        self.conductivityOptions['maxConductivityDesorptionLabel'] = tkinter.Label(self.leftPanel, text="Condutividade Máxima - Dessorção")
         self.conductivityOptions['maxConductivityDesorptionLabel'].grid(column=0,row=7)
         self.conductivityOptions['maxConductivityDesorption'] = tkinter.Entry(self.leftPanel,textVariable=self.config['maxConductivityDesorption'])
         self.conductivityOptions['maxConductivityDesorption'].grid(column=1,row=7,stick='EW')
 
         self.potentialOptions = {}
 
-        self.potentialOptions['cutPotentialAdsorptionLabel'] = tkinter.Label(self.leftPanel, text="cutPotentialAdsorption")
+        self.potentialOptions['cutPotentialAdsorptionLabel'] = tkinter.Label(self.leftPanel, text="Potencial de corte - Adsorção")
         self.potentialOptions['cutPotentialAdsorptionLabel'].grid(column=0,row=8)
         self.potentialOptions['cutPotentialAdsorption'] = tkinter.Entry(self.leftPanel,textVariable=self.config['cutPotentialAdsorption'])
         self.potentialOptions['cutPotentialAdsorption'].grid(column=1,row=8,stick='EW')
 
-        self.potentialOptions['cutPotentialDesorptionLabel'] = tkinter.Label(self.leftPanel, text="cutPotentialDesorption")
+        self.potentialOptions['cutPotentialDesorptionLabel'] = tkinter.Label(self.leftPanel, text="Potencial de corte - Dessorção")
         self.potentialOptions['cutPotentialDesorptionLabel'].grid(column=0,row=9)
         self.potentialOptions['cutPotentialDesorption'] = tkinter.Entry(self.leftPanel,textVariable=self.config['cutPotentialDesorption'])
         self.potentialOptions['cutPotentialDesorption'].grid(column=1,row=9,stick='EW')
 
-        self.numberCiclesLabel = tkinter.Label(self.leftPanel, text="numberCicles")
+        self.numberCiclesLabel = tkinter.Label(self.leftPanel, text="Numero de Ciclos")
         self.numberCiclesLabel.grid(column=0,row=10)
         self.numberCicles = Tkinter.Entry(self.leftPanel,textVariable=self.config['numberCicles'])
         self.numberCicles.grid(column=1,row=10,stick='EW')
 
-        self.maxConductivityLabel = tkinter.Label(self.leftPanel, text="maxConductivity")
+        self.maxConductivityLabel = tkinter.Label(self.leftPanel, text="Conductividade Máxima")
         self.maxConductivityLabel.grid(column=0,row=11)
         self.maxConductivity = tkinter.Entry(self.leftPanel,textVariable=self.config['maxConductivity'])
         self.maxConductivity.grid(column=1,row=11,stick='EW')
-
 
         self.toggleOn = tkinter.Button(self,text="Ligar",command=self.saveConfig)
         self.toggleOn.grid(column=0,colspan=2,row=12,stick='EW')
