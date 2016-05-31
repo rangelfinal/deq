@@ -9,7 +9,6 @@ CREATE TABLE arduino(
   solenoide BOOLEAN
 );
 
-# Variáveis possiveis - condutividade, pH, potencialcelula, nciclo, temperatura
 CREATE TABLE arduinoVariables(
   variableID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   name TEXT
@@ -22,7 +21,6 @@ INSERT INTO arduinoVariables('variableID', 'name') VALUES
   (4, 'Numero de Ciclos'),
   (5, 'Temperatura');
 
-# Modos possíveis - potenciostatico, GalvanoTempo, GalvanoCond, GalvanoPot, GalvanoGeral
 CREATE TABLE arduinoModes(
   modeID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   name TEXT
@@ -64,3 +62,5 @@ CREATE TABLE settings(
   stateID INTEGER,
   stateStartTime DATETIME
 );
+
+INSERT INTO settings('toggleSingle', 'toggleOn', 'toggleAdsorption', 'textDocument', 'timeAdsorption', 'timeDesorption', 'minConductivityAdsorption', 'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption', 'numberCicles', 'maxConductivity', 'modeID', 'fonte1', 'fonte2', 'solenoide', 'stateID', 'stateStartTime') VALUES (0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0)

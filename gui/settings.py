@@ -4,18 +4,18 @@ db = sqlite3.connect('DEQ.sqlite')
 
 class Settings:
 
-    def updateFromDB(column=None):
+    def updateFromDB(self, column=None):
         if column == None:
             cursor = db.cursor().execute('SELECT * FROM settings')
-            columns = [column[0] for column in cursor.description]
+            columns = [column[0] for columnInCursor in cursor.description]
             row = cursor.fetchone()
             self = dict(zip(columns, row))
         else:
-            cursor = db.cursor().execute('SELECT column FROM settings')
+            cursor = db.cursor().execute('SELECT ' + column + ' FROM settings')
             row = cursor.fetchone()
             setattr(self, column, row['column'])
 
-    def updateDB(column=None, newValue=None):
+    def updateDB(self, column=None, newValue=None):
         if column == None or newValue == None:
             for key, value in self:
                 cursor = db.cursor().execute('UPDATE arduino SET ?=?', key, value)

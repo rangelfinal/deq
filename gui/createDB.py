@@ -4,7 +4,7 @@ db= sqlite3.connect('DEQ.sqlite')
 cursor = db.cursor()
 
 fd = open('createDB.sql', 'r')
-sqlFile = df.read()
+sqlFile = fd.read()
 fd.close()
 
 sqlCommands = sqlFile.split(';')
