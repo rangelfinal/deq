@@ -102,10 +102,7 @@ def changeState():
     settings.stateStartTime = timer.timer()
     if settingsObj.stateID == 1:
         settingsObj.stateID = 2
-        if settings.toggleSingle:
-            serial.write(b'0,1,1')
-        else:
-            serial.write(b'0,1,0')
+        serial.write(b'0,1,0')
 
     else:
         settingsObj.stateID = 1
@@ -168,16 +165,18 @@ def GalvanoGeral():
 def main():
     ser = ArduinoSetup()
 
+    settings.solenoide = 0
+
     if settings.toggleAdsorption == True:
         settings.fonte1 = 1
         settings.fonte2 = 0
         settings.stateID = 1
+        if settings.toggleSingle:
+            settings.solenoide = 1
     else:
         settings.fonte1 = 0
         settings.fonte2 = 1
         settings.stateID = 2
-
-    settings.solenoide = settings.toggleSingle
 
     # Inicia o Arduino no estado correto
     ser.write(settings.fonte1, settings.fonte2, settings.solenoide)
