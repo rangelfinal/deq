@@ -1,4 +1,4 @@
-import settings
+from settings import Settings
 import DEQ
 
 try:
@@ -51,19 +51,24 @@ class simpleapp_tk(tkinter.Tk):
         self.config['toggleOn'] = tkinter.BooleanVar()
         self.config['toggleOn'].set(self.DBConfig.toggleOn)
 
-        self.modeRadio = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
-                                             'modeID'], value=1, command=self.changeMode)
-        self.modeRadio = tkinter.Radiobutton(self, text="Galvanostático por Tempo", variable=self.config[
-                                             'modeID'], value=2, command=self.changeMode)
-        self.modeRadio = tkinter.Radiobutton(self, text="Galvanostático por Condutividade", variable=self.config[
-                                             'modeID'], value=3, command=self.changeMode)
-        self.modeRadio = tkinter.Radiobutton(self, text="Galvanostático por Potencial", variable=self.config[
-                                             'modeID'], value=4, command=self.changeMode)
-        self.modeRadio = tkinter.Radiobutton(self, text="Galvanostático Geral", variable=self.config[
-                                             'modeID'], value=5, command=self.changeMode)
+        self.modeRadio1 = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
+                                             'modeID'], value=1, command=self.changeMode, indicatoron=0)
+        self.modeRadio2 = tkinter.Radiobutton(self, text="Galvanostático por Tempo", variable=self.config[
+                                             'modeID'], value=2, command=self.changeMode, indicatoron=0)
+        self.modeRadio3 = tkinter.Radiobutton(self, text="Galvanostático por Condutividade", variable=self.config[
+                                             'modeID'], value=3, command=self.changeMode, indicatoron=0)
+        self.modeRadio4 = tkinter.Radiobutton(self, text="Galvanostático por Potencial", variable=self.config[
+                                             'modeID'], value=4, command=self.changeMode, indicatoron=0)
+        self.modeRadio5 = tkinter.Radiobutton(self, text="Galvanostático Geral", variable=self.config[
+                                             'modeID'], value=5, command=self.changeMode, indicatoron=0)
+        self.modeRadio1.grid(column=0, row=0, stick='EW')
+        self.modeRadio2.grid(column=0, row=1, stick='EW')
+        self.modeRadio3.grid(column=0, row=2, stick='EW')
+        self.modeRadio4.grid(column=0, row=3, stick='EW')
+        self.modeRadio5.grid(column=0, row=4, stick='EW')
 
-        self.leftPanel = tkinter.Frame(self, relief=RAISED, borderwidth=1)
-        self.leftPanel.grid(column=0, row=0)
+        self.leftPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
+        self.leftPanel.grid(column=0, row=5)
 
         self.toggleSingleLabel = tkinter.Label(
             self.leftPanel, text="Single-Pass")
@@ -83,85 +88,81 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, text="Documento de texto")
         self.textDocumentLabel.grid(column=0, row=3)
         self.textDocument = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['textDocument'])
+            self.leftPanel, textvariable=self.config['textDocument'])
         self.textDocument.grid(column=1, row=3, stick='EW')
 
         self.timeOptions = {}
 
-        self.timeOptions['timeAdsorptionLabel'] = tkinter.Label(
+        self.timeAdsorptionLabel = tkinter.Label(
             self.leftPanel, text="Tempo - Adsorção")
-        self.timeOptions['timeAdsorptionLabel'].grid(column=0, row=4)
+        self.timeAdsorptionLabel.grid(column=0, row=4)
         self.timeOptions['timeAdsorption'] = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['timeAdsorption'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['timeAdsorption'], state="disabled")
         self.timeOptions['timeAdsorption'].grid(column=1, row=4, stick='EW')
 
-        self.timeOptions['timeDesorptionLabel'] = tkinter.Label(
+        self.timeDesorptionLabel = tkinter.Label(
             self.leftPanel, text="Tempo - Dessorção")
-        self.timeOptions['timeDesorptionLabel'].grid(column=0, row=5)
+        self.timeDesorptionLabel.grid(column=0, row=5)
         self.timeOptions['timeDesorption'] = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['timeDesorption'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['timeDesorption'], state="disabled")
         self.timeOptions['timeDesorption'].grid(column=1, row=5, stick='EW')
 
         self.conductivityOptions = {}
 
-        self.conductivityOptions['minConductivityAdsorptionLabel'] = tkinter.Label(
+        self.minConductivityAdsorptionLabel = tkinter.Label(
             self.leftPanel, text="Condutividade Minima - Adsorção")
-        self.conductivityOptions[
-            'minConductivityAdsorptionLabel'].grid(column=0, row=6)
+        self.minConductivityAdsorptionLabel.grid(column=0, row=6)
         self.conductivityOptions['minConductivityAdsorption'] = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['minConductivityAdsorption'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['minConductivityAdsorption'], state="disabled")
         self.conductivityOptions['minConductivityAdsorption'].grid(
             column=1, row=6, stick='EW')
 
-        self.conductivityOptions['maxConductivityDesorptionLabel'] = tkinter.Label(
+        self.maxConductivityDesorptionLabel = tkinter.Label(
             self.leftPanel, text="Condutividade Máxima - Dessorção")
-        self.conductivityOptions[
-            'maxConductivityDesorptionLabel'].grid(column=0, row=7)
+        self.maxConductivityDesorptionLabel.grid(column=0, row=7)
         self.conductivityOptions['maxConductivityDesorption'] = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['maxConductivityDesorption'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['maxConductivityDesorption'], state="disabled")
         self.conductivityOptions['maxConductivityDesorption'].grid(
             column=1, row=7, stick='EW')
 
         self.potentialOptions = {}
 
-        self.potentialOptions['cutPotentialAdsorptionLabel'] = tkinter.Label(
+        self.cutPotentialAdsorptionLabel = tkinter.Label(
             self.leftPanel, text="Potencial de corte - Adsorção")
-        self.potentialOptions[
-            'cutPotentialAdsorptionLabel'].grid(column=0, row=8)
+        self.cutPotentialAdsorptionLabel.grid(column=0, row=8)
         self.potentialOptions['cutPotentialAdsorption'] = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['cutPotentialAdsorption'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['cutPotentialAdsorption'], state="disabled")
         self.potentialOptions['cutPotentialAdsorption'].grid(
             column=1, row=8, stick='EW')
 
-        self.potentialOptions['cutPotentialDesorptionLabel'] = tkinter.Label(
+        self.cutPotentialDesorptionLabel = tkinter.Label(
             self.leftPanel, text="Potencial de corte - Dessorção")
-        self.potentialOptions[
-            'cutPotentialDesorptionLabel'].grid(column=0, row=9)
+        self.cutPotentialDesorptionLabel.grid(column=0, row=9)
         self.potentialOptions['cutPotentialDesorption'] = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['cutPotentialDesorption'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['cutPotentialDesorption'], state="disabled")
         self.potentialOptions['cutPotentialDesorption'].grid(
             column=1, row=9, stick='EW')
 
         self.numberCiclesLabel = tkinter.Label(
             self.leftPanel, text="Numero de Ciclos")
         self.numberCiclesLabel.grid(column=0, row=10)
-        self.numberCicles = Tkinter.Entry(
-            self.leftPanel, textVariable=self.config['numberCicles'], state=DISABLED)
+        self.numberCicles = tkinter.Entry(
+            self.leftPanel, textvariable=self.config['numberCicles'], state="disabled")
         self.numberCicles.grid(column=1, row=10, stick='EW')
 
         self.maxConductivityLabel = tkinter.Label(
             self.leftPanel, text="Conductividade Máxima")
         self.maxConductivityLabel.grid(column=0, row=11)
         self.maxConductivity = tkinter.Entry(
-            self.leftPanel, textVariable=self.config['maxConductivity'], state=DISABLED)
+            self.leftPanel, textvariable=self.config['maxConductivity'], state="disabled")
         self.maxConductivity.grid(column=1, row=11, stick='EW')
 
         self.toggleOn = tkinter.Button(
             self, text="Ligar", command=self.saveConfig)
-        self.toggleOn.grid(column=0, colspan=2, row=12, stick='EW')
+        self.toggleOn.grid(column=0, columnspan=2, row=12, stick='EW')
 
         self.graphPanel = tkinter.Frame(self)
-        self.graphPanel.grid(column=1, row=0, colspan=5)
+        self.graphPanel.grid(column=1, row=0, columnspan=5)
 
     def saveConfig(self):
         configToSave = {}
@@ -170,41 +171,41 @@ class simpleapp_tk(tkinter.Tk):
         DEQ.main()
 
     def changeMode(self):
-        if self.config['modeID'] == 1:
-            for opt in self.timeOptions:
-                opt['state'] = 'normal'
-            for opt in self.conductivityOptions:
-                opt['state'] = 'normal'
-            for opt in self.potentialOptions:
-                opt['state'] = 'disabled'
-        elif self.config['modeID'] == 2:
-            for opt in self.timeOptions:
-                opt['state'] = 'normal'
-            for opt in self.conductivityOptions:
-                opt['state'] = 'disabled'
-            for opt in self.potentialOptions:
-                opt['state'] = 'disabled'
-        elif self.config['modeID'] == 3:
-            for opt in self.timeOptions:
-                opt['state'] = 'disabled'
-            for opt in self.conductivityOptions:
-                opt['state'] = 'normal'
-            for opt in self.potentialOptions:
-                opt['state'] = 'disabled'
-        elif self.config['modeID'] == 4:
-            for opt in self.timeOptions:
-                opt['state'] = 'disabled'
-            for opt in self.conductivityOptions:
-                opt['state'] = 'disabled'
-            for opt in self.potentialOptions:
-                opt['state'] = 'normal'
-        elif self.config['modeID'] == 5:
-            for opt in self.timeOptions:
-                opt['state'] = 'normal'
-            for opt in self.conductivityOptions:
-                opt['state'] = 'normal'
-            for opt in self.potentialOptions:
-                opt['state'] = 'normal'
+        if self.config['modeID'].get() == 1:
+            for key, opt in self.timeOptions.items():
+                opt.config(state='normal')
+            for key, opt in self.conductivityOptions.items():
+                opt.config(state='normal')
+            for key, opt in self.potentialOptions.items():
+                opt.config(state='disabled')
+        elif self.config['modeID'].get() == 2:
+            for key, opt in self.timeOptions.items():
+                opt.config(state='normal')
+            for key, opt in self.conductivityOptions.items():
+                opt.config(state='disabled')
+            for key, opt in self.potentialOptions.items():
+                opt.config(state='disabled')
+        elif self.config['modeID'].get() == 3:
+            for key, opt in self.timeOptions.items():
+                opt.config(state='disabled')
+            for key, opt in self.conductivityOptions.items():
+                opt.config(state='normal')
+            for key, opt in self.potentialOptions.items():
+                opt.config(state='disabled')
+        elif self.config['modeID'].get() == 4:
+            for key, opt in self.timeOptions.items():
+                opt.config(state='disabled')
+            for key, opt in self.conductivityOptions.items():
+                opt.config(state='disabled')
+            for key, opt in self.potentialOptions.items():
+                opt.config(state='normal')
+        elif self.config['modeID'].get() == 5:
+            for key, opt in self.timeOptions.items():
+                opt.config(state='normal')
+            for key, opt in self.conductivityOptions.items():
+                opt.config(state='normal')
+            for key, opt in self.potentialOptions.items():
+                opt.config(state='normal')
 
 if __name__ == "__main__":
     app = simpleapp_tk(None)
