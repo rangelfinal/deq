@@ -166,8 +166,8 @@ class simpleapp_tk(tkinter.Tk):
 
     def saveConfig(self):
         configToSave = {}
-        for key, value in self.config:
-            configToSave[config] = value.get()
+        for key, value in self.config.items():
+            configToSave[key] = value.get()
         DEQ.main()
 
     def changeMode(self):
