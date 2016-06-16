@@ -1,10 +1,20 @@
-from settings import Settings
+import matplotlib
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
 import DEQ
+from settings import Settings
 
 try:
     import tkinter
 except ImportError:
     print("tkinter não foi encontrado no sistema!")
+
+
+matplotlib.use("TkAgg")
+# except ImportError:
+#print("matplotlib não foi encontrado no sistema!")
 
 
 class simpleapp_tk(tkinter.Tk):
@@ -52,15 +62,15 @@ class simpleapp_tk(tkinter.Tk):
         self.config['toggleOn'].set(self.DBConfig.toggleOn)
 
         self.modeRadio1 = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
-                                             'modeID'], value=1, command=self.changeMode, indicatoron=0)
+            'modeID'], value=1, command=self.changeMode, indicatoron=0)
         self.modeRadio2 = tkinter.Radiobutton(self, text="Galvanostático por Tempo", variable=self.config[
-                                             'modeID'], value=2, command=self.changeMode, indicatoron=0)
+            'modeID'], value=2, command=self.changeMode, indicatoron=0)
         self.modeRadio3 = tkinter.Radiobutton(self, text="Galvanostático por Condutividade", variable=self.config[
-                                             'modeID'], value=3, command=self.changeMode, indicatoron=0)
+            'modeID'], value=3, command=self.changeMode, indicatoron=0)
         self.modeRadio4 = tkinter.Radiobutton(self, text="Galvanostático por Potencial", variable=self.config[
-                                             'modeID'], value=4, command=self.changeMode, indicatoron=0)
+            'modeID'], value=4, command=self.changeMode, indicatoron=0)
         self.modeRadio5 = tkinter.Radiobutton(self, text="Galvanostático Geral", variable=self.config[
-                                             'modeID'], value=5, command=self.changeMode, indicatoron=0)
+            'modeID'], value=5, command=self.changeMode, indicatoron=0)
         self.modeRadio1.grid(column=0, row=0, stick='EW')
         self.modeRadio2.grid(column=0, row=1, stick='EW')
         self.modeRadio3.grid(column=0, row=2, stick='EW')
@@ -161,8 +171,31 @@ class simpleapp_tk(tkinter.Tk):
             self, text="Ligar", command=self.saveConfig)
         self.toggleOn.grid(column=0, columnspan=2, row=12, stick='EW')
 
+        # Gráficos
+
         self.graphPanel = tkinter.Frame(self)
         self.graphPanel.grid(column=1, row=0, columnspan=5)
+
+        self.conductivityGraph = {}
+        self.conductivityGraph['frame'] = tkinter.Frame(self.graphPanel)
+        self.conductivityGraph['frame'].grid(column=0, row=0, rowspan=2)
+        self.conductivityGraph['figure'] = Figure()
+        self.conductivityGraph['canvas'] = FigureCanvasTkAgg(
+            self.conductivityGraph['figure'], master=self.conductivityGraph['frame'])
+
+        self.pHGraph = {}
+        self.pHGraph['frame'] = tkinter.Frame(self.graphPanel)
+        self.pHGraph['frame'].grid(column=1, row=0)
+        self.pHGraph['figure'] = Figure()
+        self.pHGraph['canvas'] = FigureCanvasTkAgg(
+            self.pHGraph['figure'], master=self.pHGraph['frame'])
+
+        self.potentialGraph = {}
+        self.potentialGraph['frame'] = tkinter.Frame(self.graphPanel)
+        self.potentialGraph['frame'].grid(column=1, row=1)
+        self.potentialGraph['figure'] = Figure()
+        self.potentialGraph['canvas'] = FigureCanvasTkAgg(
+            self.potentialGraph['figure'], master=self.potentialGraph['frame'])
 
     def saveConfig(self):
         configToSave = {}
@@ -206,6 +239,9 @@ class simpleapp_tk(tkinter.Tk):
                 opt.config(state='normal')
             for key, opt in self.potentialOptions.items():
                 opt.config(state='normal')
+
+    def updateGraph(self):
+
 
 if __name__ == "__main__":
     app = simpleapp_tk(None)
