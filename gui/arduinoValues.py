@@ -1,5 +1,7 @@
 import sqlite3
+
 db = sqlite3.connect('DEQ.sqlite')
+
 
 class ArduinoValues:
 
@@ -9,15 +11,38 @@ class ArduinoValues:
 
     def populate(self, **args):
 
+
 class ArduinoValue:
 
     def __init__(self, **args):
 
     def populate(self, **args):
 
-    def updateFromDB(self):
+    def updateFromDB(self, column=None):
+        if column == None:
+            cursor = db.cursor().execute('SELECT * FROM arduino')
+            columns = []
+            for c in cursor.description:
+                columns.append(c[0])
+            row = cursor.fetchone()
+            self = dict(zip(columns, row))
+        else:
+            cursor = db.cursor().execute('SELECT ' + column + ' FROM arduino')
+            row = cursor.fetchone()
+            setattr(self, column, row[0])
 
-    def updateDB(self):
+    def updateDB(self, column=None, newValue=None):
+        if !hasattr(self, 'id') or self.id = None:
+            cursor = db.cursor.execute('INSERT INTO arduino(variableID,value,modeID,fonte1,fonte2,solenoide) VALUES (?, ?, ?, ?, ?, ?)',
+                                       self.variableID, self.value, self.modeID, self.fonte1, self.fonte2, self.solenoide)
+            self.id = cursor.lastrowid
+        if column == None or newValue == None:
+            for key, value in self:
+                cursor = db.cursor().execute('UPDATE arduino SET ' + key + '=' + value)
+        else:
+            if newValue == "":
+                newValue = "''"
+            cursor = db.cursor().execute('UPDATE arduino SET ' + column + '=' + str(newValue))
 
     @property
     def ID(self):
@@ -26,7 +51,6 @@ class ArduinoValue:
 
     @ID.setter
     def ID(self, value):
-        self.updateDB('ID', value)
         self._ID = value
 
     @property
