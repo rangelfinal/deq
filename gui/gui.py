@@ -1,10 +1,50 @@
-from settings import Settings
+import os
+import sched
+import time
+import uuid
+
+import matplotlib
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
 import DEQ
+from settings import Settings
+
+matplotlib.use('TkAgg')
+
+
 
 try:
     import tkinter
 except ImportError:
     print("tkinter não foi encontrado no sistema!")
+
+
+s = sched.scheduler(time.time, time.sleep)
+# except ImportError:
+#print("matplotlib não foi encontrado no sistema!")
+
+
+def updateGraph(self):
+    for variableID in [1, 2, 3]:
+        cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=? AND variableID=?  ORDER BY ID LIMIT 30',
+                                     self.DBConfig.currentUUID, variableID)
+        result = cursor.fetchall()
+        if variableID == 1:
+            conductivityGraph['subplot'].clear()
+            self.conductivityGraph['subplot'].plot(result)
+            self.conductivityGraph['subplot'].draw()
+        if variableID == 2:
+            pHGraph['subplot'].clear()
+            self.pHGraph['subplot'].plot(result)
+            self.pHGraph['subplot'].draw()
+        if variableID == 3:
+            potentialGraph['subplot'].clear()
+            self.potentialGraph['subplot'].plot(result)
+            self.potentialGraph['subplot'].draw()
+
+    s.enter(1, 1, updateGraph)
 
 
 class simpleapp_tk(tkinter.Tk):
@@ -15,11 +55,19 @@ class simpleapp_tk(tkinter.Tk):
         self.initialize()
 
     def initialize(self):
+        filename = os.path.join(os.getcwd(), 'DEQ.sqlite')
+        print(filename)
+        if not os.path.isfile(filename):
+            import createDB
+            createDB.createDB()
+
         self.grid()
 
         self.config = {}
 
         self.DBConfig = Settings()
+
+        self.DBConfig.currentUUID = uuid.uuid4().hex
 
         self.config['modeID'] = tkinter.IntVar()
         self.config['toggleSingle'] = tkinter.BooleanVar()
@@ -52,15 +100,15 @@ class simpleapp_tk(tkinter.Tk):
         self.config['toggleOn'].set(self.DBConfig.toggleOn)
 
         self.modeRadio1 = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
-                                             'modeID'], value=1, command=self.changeMode, indicatoron=0)
+            'modeID'], value=1, command=self.changeMode, indicatoron=0)
         self.modeRadio2 = tkinter.Radiobutton(self, text="Galvanostático por Tempo", variable=self.config[
-                                             'modeID'], value=2, command=self.changeMode, indicatoron=0)
+            'modeID'], value=2, command=self.changeMode, indicatoron=0)
         self.modeRadio3 = tkinter.Radiobutton(self, text="Galvanostático por Condutividade", variable=self.config[
-                                             'modeID'], value=3, command=self.changeMode, indicatoron=0)
+            'modeID'], value=3, command=self.changeMode, indicatoron=0)
         self.modeRadio4 = tkinter.Radiobutton(self, text="Galvanostático por Potencial", variable=self.config[
-                                             'modeID'], value=4, command=self.changeMode, indicatoron=0)
+            'modeID'], value=4, command=self.changeMode, indicatoron=0)
         self.modeRadio5 = tkinter.Radiobutton(self, text="Galvanostático Geral", variable=self.config[
-                                             'modeID'], value=5, command=self.changeMode, indicatoron=0)
+            'modeID'], value=5, command=self.changeMode, indicatoron=0)
         self.modeRadio1.grid(column=0, row=0, stick='EW')
         self.modeRadio2.grid(column=0, row=1, stick='EW')
         self.modeRadio3.grid(column=0, row=2, stick='EW')
@@ -161,13 +209,44 @@ class simpleapp_tk(tkinter.Tk):
             self, text="Ligar", command=self.saveConfig)
         self.toggleOn.grid(column=0, columnspan=2, row=12, stick='EW')
 
+        # Gráficos
+
         self.graphPanel = tkinter.Frame(self)
         self.graphPanel.grid(column=1, row=0, columnspan=5)
 
+        self.conductivityGraph = {}
+        self.conductivityGraph['frame'] = tkinter.Frame(self.graphPanel)
+        self.conductivityGraph['frame'].grid(column=0, row=0, rowspan=2)
+        self.conductivityGraph['figure'] = Figure()
+        self.conductivityGraph['subplot'] = self.conductivityGraph[
+            'figure'].add_subplot(111)
+        self.conductivityGraph['canvas'] = FigureCanvasTkAgg(
+            self.conductivityGraph['figure'], master=self.conductivityGraph['frame'])
+        self.conductivityGraph['canvas'].show()
+
+        self.pHGraph = {}
+        self.pHGraph['frame'] = tkinter.Frame(self.graphPanel)
+        self.pHGraph['frame'].grid(column=1, row=0)
+        self.pHGraph['figure'] = Figure()
+        self.pHGraph['subplot'] = self.pHGraph['figure'].add_subplot(111)
+        self.pHGraph['canvas'] = FigureCanvasTkAgg(
+            self.pHGraph['figure'], master=self.pHGraph['frame'])
+        self.pHGraph['canvas'].show()
+
+        self.potentialGraph = {}
+        self.potentialGraph['frame'] = tkinter.Frame(self.graphPanel)
+        self.potentialGraph['frame'].grid(column=1, row=1)
+        self.potentialGraph['figure'] = Figure()
+        self.potentialGraph['subplot'] = self.potentialGraph[
+            'figure'].add_subplot(111)
+        self.potentialGraph['canvas'] = FigureCanvasTkAgg(
+            self.potentialGraph['figure'], master=self.potentialGraph['frame'])
+        self.potentialGraph['canvas'].show()
+
+        s.enter(1, 1, updateGraph)
+
     def saveConfig(self):
-        configToSave = {}
-        for key, value in self.config:
-            configToSave[config] = value.get()
+        self.DBConfig.toggleOn = True
         DEQ.main()
 
     def changeMode(self):

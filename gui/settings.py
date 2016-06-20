@@ -1,26 +1,32 @@
-import time
 import sqlite3
+import time
+
 db = sqlite3.connect('DEQ.sqlite')
+
 
 class Settings:
 
     def updateFromDB(self, column=None):
         if column == None:
             cursor = db.cursor().execute('SELECT * FROM settings')
-            columns = [column[0] for columnInCursor in cursor.description]
+            columns = []
+            for c in cursor.description:
+                columns.append(c[0])
             row = cursor.fetchone()
             self = dict(zip(columns, row))
         else:
             cursor = db.cursor().execute('SELECT ' + column + ' FROM settings')
             row = cursor.fetchone()
-            setattr(self, column, row['column'])
+            setattr(self, column, row[0])
 
     def updateDB(self, column=None, newValue=None):
         if column == None or newValue == None:
             for key, value in self:
-                cursor = db.cursor().execute('UPDATE arduino SET ?=?', key, value)
+                cursor = db.cursor().execute('UPDATE settings SET ' + key + '=' + value)
         else:
-            cursor = db.cursor().execute('UPDATE arduino SET ?=?', column, newValue)
+            if isinstance(newValue, str):
+                newValue = "'" + newValue + "'"
+            cursor = db.cursor().execute('UPDATE settings SET ' + column + '=' + str(newValue))
 
     def __init__(self):
         self.updateFromDB()
@@ -204,6 +210,16 @@ class Settings:
     def stateStartTime(self, value):
         self.updateDB('stateStartTime', value)
         self._stateStartTime = value
+
+    @property
+    def currentUUID(self):
+        self.updateFromDB('currentUUID')
+        return self._currentUUID
+
+    @currentUUID.setter
+    def currentUUID(self, value):
+        self.updateDB('currentUUID', value)
+        self._currentUUID = value
 
     def timeInCurrentState(self):
         return time.time() - self.stateStartTime

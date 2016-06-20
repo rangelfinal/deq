@@ -6,7 +6,8 @@ CREATE TABLE arduino(
   modeID INTEGER,
   fonte1 BOOLEAN,
   fonte2 BOOLEAN,
-  solenoide BOOLEAN
+  solenoide BOOLEAN,
+  currentUUID TEXT
 );
 
 CREATE TABLE arduinoVariables(
@@ -60,7 +61,8 @@ CREATE TABLE settings(
   fonte2 BOOLEAN,
   solenoide BOOLEAN,
   stateID INTEGER,
-  stateStartTime DATETIME
+  stateStartTime DATETIME,
+  currentUUID TEXT
 );
 
 INSERT INTO settings('toggleSingle', 'toggleOn', 'toggleAdsorption', 'textDocument', 'timeAdsorption', 'timeDesorption', 'minConductivityAdsorption', 'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption', 'numberCicles', 'maxConductivity', 'modeID', 'fonte1', 'fonte2', 'solenoide', 'stateID', 'stateStartTime') VALUES (0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0)
