@@ -22,8 +22,9 @@ class Settings:
             for key, value in self:
                 cursor = db.cursor().execute('UPDATE settings SET '+ key +'='+value)
         else:
-            if newValue == "":
-                newValue = "''"
+            if isinstance(newValue, str):
+                newValue = "'" + newValue + "'"
+            print('UPDATE settings SET '+ column + '=' + str(newValue))
             cursor = db.cursor().execute('UPDATE settings SET '+ column + '=' + str(newValue))
 
     def __init__(self):
@@ -208,6 +209,16 @@ class Settings:
     def stateStartTime(self, value):
         self.updateDB('stateStartTime', value)
         self._stateStartTime = value
+
+    @property
+    def currentUUID(self):
+        self.updateFromDB('currentUUID')
+        return self._currentUUID
+
+    @currentUUID.setter
+    def currentUUID(self, value):
+        self.updateDB('currentUUID', value)
+        self._currentUUID = value
 
     def timeInCurrentState(self):
         return time.time() - self.stateStartTime

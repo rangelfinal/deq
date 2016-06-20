@@ -1,17 +1,21 @@
 import sqlite3
 
-db= sqlite3.connect('DEQ.sqlite')
-cursor = db.cursor()
+def createDB():
+    db= sqlite3.connect('DEQ.sqlite')
+    cursor = db.cursor()
 
-fd = open('createDB.sql', 'r')
-sqlFile = fd.read()
-fd.close()
+    fd = open('createDB.sql', 'r')
+    sqlFile = fd.read()
+    fd.close()
 
-sqlCommands = sqlFile.split(';')
-for command in sqlCommands:
-    try:
-        cursor.execute(command)
-    except Exception as e:
-        raise
+    sqlCommands = sqlFile.split(';')
+    for command in sqlCommands:
+        try:
+            cursor.execute(command)
+        except Exception as e:
+            raise
 
-db.commit()
+    db.commit()
+
+if __name__ == '__main__':
+    createDB()

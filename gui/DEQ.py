@@ -3,6 +3,7 @@ from settings import Settings
 import serial
 import sys
 import serial.tools.list_ports
+import time
 
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
 settingsObj = Settings()
@@ -12,13 +13,13 @@ valuesFromArduino = {}
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
     sqlStringTemplate = ('''INSERT INTO'
-        'arduino(variableID, value, modeID, fonte1, fonte2, solenoide)'
-        'VALUES(?,?,?,?,?,?)''')
+        'arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID)'
+        'VALUES(?,?,?,?,?,?,?)''')
 
     for data in dataToSave:
         try:
             cursor.execute(sqlStringTemplate, data, settingsObj.modeID,
-                           settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
+                           settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID)
         except Exception as e:
             raise
 
@@ -30,32 +31,22 @@ def SaveToArduinoTable(dataToSave):
 
 def ArduinoSetup():
 
-    int1 = 0
-    str1 = ""
-    str2 = ""
-
     # Find Live Ports
     ports = list(serial.tools.list_ports.comports())
+    COMstr = ""
+
     for p in ports:
 
-        while int1 < 9:   # Loop checks "COM0" to "COM8" for Adruino Port Info.
+        if "HL-340" in p[1] or "Arduino" in p[1] or "Serial" in p[1]:
+            COMstr = p[0]
 
-            if "CH340" in p[1]:  # Looks for "CH340" in P[1].
-                str2 = str(int1)  # Converts an Integer to a String, allowing:
-                str1 = "COM" + str2  # add the strings together.
-
-            if "CH340" in p[1] and str1 in p[1]:  # Looks for "CH340" and "COM#"
-                # print "Found Arduino Uno on " + str1
-                int1 = 9  # Causes loop to end.
-
-            if int1 == 8:
-                print ("Arduino not found!")
-                sys.exit()  # Terminates Script.
-                int1 = int1 + 1
+    if COMstr == "":
+        print("Arduino não encontrado!")
+        sys.exit()
 
     # Set Port
     # Put in your speed and timeout value.
-    ser = serial.Serial(str1, 9600, timeout=10)
+    ser = serial.Serial(COMstr, 9600, timeout=10)
 
     # This begins the opening and printout of data from the Adruino.
 
@@ -99,14 +90,14 @@ def ArduinoRead():
 
 
 def changeState():
-    settings.stateStartTime = timer.timer()
+    settingsObj.stateStartTime = timer.timer()
     if settingsObj.stateID == 1:
         settingsObj.stateID = 2
         serial.write(b'0,1,0')
 
     else:
         settingsObj.stateID = 1
-        if settings.toggleSingle:
+        if settingsObj.toggleSingle:
             serial.write(b'1,0,1')
         else:
             serial.write(b'1,0,0')
@@ -114,97 +105,79 @@ def changeState():
 
 def shouldChangeStates(triggers):
     if 'timeAdsorption' in triggers:
-        if settings.timeInCurrentState >= settings.timeAdsorption:
+        if settingsObj.timeInCurrentState >= settingsObj.timeAdsorption:
             return true
 
     if 'timeDesorption' in triggers:
-        if settings.timeInCurrentState >= settings.timeDesorption:
+        if settingsObj.timeInCurrentState >= settingsObj.timeDesorption:
             return true
 
     if 'minConductivityAdsorption' in triggers:
-        if settings.minConductivityAdsorption > valuesFromArduino['condutividade']:
+        if settingsObj.minConductivityAdsorption > valuesFromArduino['condutividade']:
             return true
 
     if 'maxConductivityDesorption' in triggers:
-        if settings.maxConductivityDesorption < valuesFromArduino['condutividade']:
+        if settingsObj.maxConductivityDesorption < valuesFromArduino['condutividade']:
             return true
 
     if 'cutPotentialAdsorption' in triggers:
-        if settings.cutPotentialAdsorption > valuesFromArduino['potencialcelula']:
+        if settingsObj.cutPotentialAdsorption > valuesFromArduino['potencialcelula']:
             return true
 
     if 'cutPotentialDesorption' in triggers:
-        if settings.cutPotentialDesorption > valuesFromArduino['potencialcelula']:
+        if settingsObj.cutPotentialDesorption > valuesFromArduino['potencialcelula']:
             return true
 
     return false
 
-
-def potenciostatico():
-    triggers = ['timeAdsorption', 'timeDesorption',
-                'minConductivityAdsorption', 'maxConductivityDesorption']
-
-
-def GalvanoTempo():
-    triggers = ['timeAdsorption', 'timeDesorption']
-
-
-def GalvanoCond():
-    triggers = ['minConductivityAdsorption', 'maxConductivityDesorption']
-
-
-def GalvanoPot():
-    triggers = ['cutPotentialAdsorption', 'cutPotentialDesorption']
-
-
-def GalvanoGeral():
-    triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption',
-                'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
-
-
 def main():
     ser = ArduinoSetup()
 
-    settings.solenoide = 0
+    settingsObj.solenoide = 0
 
-    if settings.toggleAdsorption == True:
-        settings.fonte1 = 1
-        settings.fonte2 = 0
-        settings.stateID = 1
-        if settings.toggleSingle:
-            settings.solenoide = 1
+    if settingsObj.toggleAdsorption == True:
+        settingsObj.fonte1 = 1
+        settingsObj.fonte2 = 0
+        settingsObj.stateID = 1
+        if settingsObj.toggleSingle:
+            settingsObj.solenoide = 1
     else:
-        settings.fonte1 = 0
-        settings.fonte2 = 1
-        settings.stateID = 2
+        settingsObj.fonte1 = 0
+        settingsObj.fonte2 = 1
+        settingsObj.stateID = 2
 
     # Inicia o Arduino no estado correto
-    ser.write(settings.fonte1, settings.fonte2, settings.solenoide)
+    arduinoStr = str(settingsObj.fonte1) + ";" + str(settingsObj.fonte2) + ";" + str(settingsObj.solenoide)
+    ser.write(arduinoStr.encode('utf-8'))
 
     # Marca o tempo de início do primeiro estado
-    settings.stateStartTime = time.time()
+    settingsObj.stateStartTime = time.time()
 
-    if settingss.modeID == 1:  # Potenciostatico
-        potenciostatico()
+    print(settingsObj.modeID)
 
-    if settingss.modeID == 2:  # Galvanostático - tempo
-        GalvanoTempo()
+    if settingsObj.modeID == 1:  # Potenciostatico
+        triggers = ['timeAdsorption', 'timeDesorption',
+                    'minConductivityAdsorption', 'maxConductivityDesorption']
 
-    if settingss.modeID == 3:  # Galvanostático - condutividade
-        GalvanoCond()
+    if settingsObj.modeID == 2:  # Galvanostático - tempo
+        triggers = ['timeAdsorption', 'timeDesorption']
 
-    if settingss.modeID == 4:  # galvanostático - potencialcelula
-        GalvanoPot()
+    if settingsObj.modeID == 3:  # Galvanostático - condutividade
+        triggers = ['minConductivityAdsorption', 'maxConductivityDesorption']
 
-    if settingss.modeID == 5:  # galvanostático - geral
-        GalvanoGeral()
+    if settingsObj.modeID == 4:  # galvanostático - potencialcelula
+        triggers = ['cutPotentialAdsorption', 'cutPotentialDesorption']
 
-    while settings.toggleOn and valuesFromArduino['nciclo'] < settings.numberCicles:
+    if settingsObj.modeID == 5:  # galvanostático - geral
+        triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption',
+                    'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
+
+    while settingsObj.toggleOn and valuesFromArduino['nciclo'] < settingsObj.numberCicles:
 
         time.sleep(1)
         leitura = ArduinoRead()
 
-        if valuesFromArduino['condutividade'] > settings.maxConductivity:
+        if valuesFromArduino['condutividade'] > settingsObj.maxConductivity:
             break  # NÃO FAZ NADA SE A CONDUTIVIDADE FOR MAIOR QUE A MÁXIMA
 
         if shouldChangeStates:
