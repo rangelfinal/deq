@@ -4,16 +4,13 @@ import time
 import uuid
 
 import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 import DEQ
 from settings import Settings
-
-matplotlib.use('TkAgg')
-
-
 
 try:
     import tkinter
@@ -25,34 +22,32 @@ s = sched.scheduler(time.time, time.sleep)
 # except ImportError:
 #print("matplotlib não foi encontrado no sistema!")
 
-
-def updateGraph(self):
-    for variableID in [1, 2, 3]:
-        cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=? AND variableID=?  ORDER BY ID LIMIT 30',
-                                     self.DBConfig.currentUUID, variableID)
-        result = cursor.fetchall()
-        if variableID == 1:
-            conductivityGraph['subplot'].clear()
-            self.conductivityGraph['subplot'].plot(result)
-            self.conductivityGraph['subplot'].draw()
-        if variableID == 2:
-            pHGraph['subplot'].clear()
-            self.pHGraph['subplot'].plot(result)
-            self.pHGraph['subplot'].draw()
-        if variableID == 3:
-            potentialGraph['subplot'].clear()
-            self.potentialGraph['subplot'].plot(result)
-            self.potentialGraph['subplot'].draw()
-
-    s.enter(1, 1, updateGraph)
-
-
 class simpleapp_tk(tkinter.Tk):
 
     def __init__(self, parent):
         tkinter.Tk.__init__(self, parent)
         self.parent = parent
         self.initialize()
+
+    def updateGraph(self):
+        for variableID in [1, 2, 3]:
+            cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=? AND variableID=?  ORDER BY ID LIMIT 30',
+                                         self.DBConfig.currentUUID, variableID)
+            result = cursor.fetchall()
+            if variableID == 1:
+                conductivityGraph['subplot'].clear()
+                self.conductivityGraph['subplot'].plot(result)
+                self.conductivityGraph['subplot'].draw()
+            if variableID == 2:
+                pHGraph['subplot'].clear()
+                self.pHGraph['subplot'].plot(result)
+                self.pHGraph['subplot'].draw()
+            if variableID == 3:
+                potentialGraph['subplot'].clear()
+                self.potentialGraph['subplot'].plot(result)
+                self.potentialGraph['subplot'].draw()
+
+        s.enter(1, 1, self.updateGraph)
 
     def initialize(self):
         filename = os.path.join(os.getcwd(), 'DEQ.sqlite')
@@ -206,7 +201,7 @@ class simpleapp_tk(tkinter.Tk):
         self.maxConductivity.grid(column=1, row=11, stick='EW')
 
         self.toggleOn = tkinter.Button(
-            self, text="Ligar", command=self.saveConfig)
+            self, text="Ligar", command=self.toggleOnClick)
         self.toggleOn.grid(column=0, columnspan=2, row=12, stick='EW')
 
         # Gráficos
@@ -243,11 +238,17 @@ class simpleapp_tk(tkinter.Tk):
             self.potentialGraph['figure'], master=self.potentialGraph['frame'])
         self.potentialGraph['canvas'].show()
 
-        s.enter(1, 1, updateGraph)
+        s.enter(1, 1, self.updateGraph)
 
-    def saveConfig(self):
-        self.DBConfig.toggleOn = True
-        DEQ.main()
+    def toggleOnClick(self):
+        if self.DBConfig.toggleOn == 0:
+            self.DBConfig.toggleOn = 1
+            self.toggleOn.config(text="Desligar")
+
+        if self.DBConfig.toggleOn == 1:
+            self.DBConfig.toggleOn = 0
+            self.toggleOn.config(text="Ligar")
+            DEQ.main()
 
     def changeMode(self):
         if self.config['modeID'].get() == 1:

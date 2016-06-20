@@ -26,6 +26,7 @@ class Settings:
         else:
             if isinstance(newValue, str):
                 newValue = "'" + newValue + "'"
+            print('UPDATE settings SET ' + column + '=' + str(newValue))
             cursor = db.cursor().execute('UPDATE settings SET ' + column + '=' + str(newValue))
 
     def __init__(self):

@@ -5,6 +5,9 @@ import time
 import serial
 import serial.tools.list_ports
 
+import tkinter
+from tkinter import messagebox
+
 from settings import Settings
 
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
@@ -43,15 +46,17 @@ def ArduinoSetup():
 
     if COMstr == "":
         print("Arduino não encontrado!")
-        sys.exit()
+        tkinter.messagebox.showerror("Erro", "Arduino não encontrado!")
+        settingsObj.toggleOn = 0
+        return False
 
-    ser = serial.Serial(COMstr, 9600, timeout=10)
+    else:
+        ser = serial.Serial(COMstr, 9600, timeout=10)
 
+        ser.close()
+        ser.open()
 
-    ser.close()
-    ser.open()
-
-    return ser
+        return ser
 
 # Lê as informações vindas do arduino e salva no DB, o tempo de início da
 # execução é o argumento
@@ -65,16 +70,16 @@ def ArduinoRead():
     # arduino
     for i in range(0, len(entrada)):
         if (entrada[i] == 'c'):
-            valuesFromArduino['condutividade'] = int(entrada[i + 1:i + 8])
+            valuesFromArduino['condutividade'] = float(entrada[i + 1:i + 8])
         if (entrada[i] == 'p'):
-            valuesFromArduino['pH'] = int(entrada[i + 1:i + 8])
+            valuesFromArduino['pH'] = float(entrada[i + 1:i + 8])
         if (entrada[i] == 'a'):
-            valuesFromArduino['potencialcelula'] = int(
+            valuesFromArduino['potencialcelula'] = float(
                 entrada[i + 1:i + 8])  # Potencial de Célula
         if (entrada[i] == 'n'):
-            valuesFromArduino['nciclo'] = int(entrada[i + 1:i + 8])
+            valuesFromArduino['nciclo'] = float(entrada[i + 1:i + 8])
         if (entrada[i] == 't'):
-            valuesFromArduino['temperatura'] = int(entrada[i + 1:i + 8])
+            valuesFromArduino['temperatura'] = float(entrada[i + 1:i + 8])
 
     data = [(1, valuesFromArduino['condutividade']),
             (2, valuesFromArduino['pH']),
@@ -132,56 +137,59 @@ def shouldChangeStates(triggers):
 def main():
     ser = ArduinoSetup()
 
-    settingsObj.solenoide = 0
+    if ser != False:
 
-    if settingsObj.toggleAdsorption == True:
-        settingsObj.fonte1 = 1
-        settingsObj.fonte2 = 0
-        settingsObj.stateID = 1
-        if settingsObj.toggleSingle:
-            settingsObj.solenoide = 1
-    else:
-        settingsObj.fonte1 = 0
-        settingsObj.fonte2 = 1
-        settingsObj.stateID = 2
+        settingsObj.solenoide = 0
 
-    # Inicia o Arduino no estado correto
-    arduinoStr = str(settingsObj.fonte1) + ";" + \
-        str(settingsObj.fonte2) + ";" + str(settingsObj.solenoide)
-    print(arduinoStr)
-    ser.write(arduinoStr.encode('utf-8'))
+        if settingsObj.toggleAdsorption == True:
+            settingsObj.fonte1 = 1
+            settingsObj.fonte2 = 0
+            settingsObj.stateID = 1
+            if settingsObj.toggleSingle:
+                settingsObj.solenoide = 1
+        else:
+            settingsObj.fonte1 = 0
+            settingsObj.fonte2 = 1
+            settingsObj.stateID = 2
 
-    # Marca o tempo de início do primeiro estado
-    settingsObj.stateStartTime = time.time()
+        # Inicia o Arduino no estado correto
+        arduinoStr = str(settingsObj.fonte1) + ";" + \
+            str(settingsObj.fonte2) + ";" + str(settingsObj.solenoide)
+        print(arduinoStr)
+        ser.write(arduinoStr.encode('utf-8'))
 
-    print(settingsObj.modeID)
+        # Marca o tempo de início do primeiro estado
+        settingsObj.stateStartTime = time.time()
 
-    if settingsObj.modeID == 1:  # Potenciostatico
-        triggers = ['timeAdsorption', 'timeDesorption',
-                    'minConductivityAdsorption', 'maxConductivityDesorption']
+        print(settingsObj.modeID)
 
-    if settingsObj.modeID == 2:  # Galvanostático - tempo
-        triggers = ['timeAdsorption', 'timeDesorption']
+        if settingsObj.modeID == 1:  # Potenciostatico
+            triggers = ['timeAdsorption', 'timeDesorption',
+                        'minConductivityAdsorption', 'maxConductivityDesorption']
 
-    if settingsObj.modeID == 3:  # Galvanostático - condutividade
-        triggers = ['minConductivityAdsorption', 'maxConductivityDesorption']
+        if settingsObj.modeID == 2:  # Galvanostático - tempo
+            triggers = ['timeAdsorption', 'timeDesorption']
 
-    if settingsObj.modeID == 4:  # galvanostático - potencialcelula
-        triggers = ['cutPotentialAdsorption', 'cutPotentialDesorption']
+        if settingsObj.modeID == 3:  # Galvanostático - condutividade
+            triggers = ['minConductivityAdsorption', 'maxConductivityDesorption']
 
-    if settingsObj.modeID == 5:  # galvanostático - geral
-        triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption',
-                    'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
+        if settingsObj.modeID == 4:  # galvanostático - potencialcelula
+            triggers = ['cutPotentialAdsorption', 'cutPotentialDesorption']
 
-    while settingsObj.toggleOn and valuesFromArduino['nciclo'] < settingsObj.numberCicles:
+        if settingsObj.modeID == 5:  # galvanostático - geral
+            triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption',
+                        'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
 
-        time.sleep(1)
-        leitura = ArduinoRead()
+        while settingsObj.toggleOn and valuesFromArduino['nciclo'] < settingsObj.numberCicles:
 
-        if valuesFromArduino['condutividade'] > settingsObj.maxConductivity:
-            break  # NÃO FAZ NADA SE A CONDUTIVIDADE FOR MAIOR QUE A MÁXIMA
+            time.sleep(1)
+            leitura = ArduinoRead()
 
-        if shouldChangeStates:
-            changeState()
+            if valuesFromArduino['condutividade'] > settingsObj.maxConductivity:
+                break  # NÃO FAZ NADA SE A CONDUTIVIDADE FOR MAIOR QUE A MÁXIMA
 
-    ser.write(b'0,0,0')
+            if shouldChangeStates:
+                changeState()
+
+        settingsObj.toggleOn = 0
+        ser.write(b'0,0,0')
