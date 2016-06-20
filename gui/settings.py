@@ -1,6 +1,8 @@
-import time
 import sqlite3
+import time
+
 db = sqlite3.connect('DEQ.sqlite')
+
 
 class Settings:
 
@@ -20,12 +22,11 @@ class Settings:
     def updateDB(self, column=None, newValue=None):
         if column == None or newValue == None:
             for key, value in self:
-                cursor = db.cursor().execute('UPDATE settings SET '+ key +'='+value)
+                cursor = db.cursor().execute('UPDATE settings SET ' + key + '=' + value)
         else:
             if isinstance(newValue, str):
                 newValue = "'" + newValue + "'"
-            print('UPDATE settings SET '+ column + '=' + str(newValue))
-            cursor = db.cursor().execute('UPDATE settings SET '+ column + '=' + str(newValue))
+            cursor = db.cursor().execute('UPDATE settings SET ' + column + '=' + str(newValue))
 
     def __init__(self):
         self.updateFromDB()

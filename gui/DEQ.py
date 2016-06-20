@@ -1,12 +1,14 @@
 import sqlite3
-from settings import Settings
-import serial
 import sys
-import serial.tools.list_ports
 import time
 
+import serial
+import serial.tools.list_ports
+
+from settings import Settings
+
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
-settingsObj = Settings()
+settingsObj = Settings() # Cria um novo objeto para armazenar configurações
 valuesFromArduino = {}
 
 
@@ -31,7 +33,6 @@ def SaveToArduinoTable(dataToSave):
 
 def ArduinoSetup():
 
-    # Find Live Ports
     ports = list(serial.tools.list_ports.comports())
     COMstr = ""
 
@@ -44,14 +45,11 @@ def ArduinoSetup():
         print("Arduino não encontrado!")
         sys.exit()
 
-    # Set Port
-    # Put in your speed and timeout value.
     ser = serial.Serial(COMstr, 9600, timeout=10)
 
-    # This begins the opening and printout of data from the Adruino.
 
-    ser.close()  # In case the port is already open this closes it.
-    ser.open()   # Reopen the port.
+    ser.close()
+    ser.open()
 
     return ser
 
@@ -130,6 +128,7 @@ def shouldChangeStates(triggers):
 
     return false
 
+
 def main():
     ser = ArduinoSetup()
 
@@ -147,7 +146,9 @@ def main():
         settingsObj.stateID = 2
 
     # Inicia o Arduino no estado correto
-    arduinoStr = str(settingsObj.fonte1) + ";" + str(settingsObj.fonte2) + ";" + str(settingsObj.solenoide)
+    arduinoStr = str(settingsObj.fonte1) + ";" + \
+        str(settingsObj.fonte2) + ";" + str(settingsObj.solenoide)
+    print(arduinoStr)
     ser.write(arduinoStr.encode('utf-8'))
 
     # Marca o tempo de início do primeiro estado

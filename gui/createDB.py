@@ -1,7 +1,8 @@
 import sqlite3
 
+
 def createDB():
-    db= sqlite3.connect('DEQ.sqlite')
+    db = sqlite3.connect('DEQ.sqlite')
     cursor = db.cursor()
 
     fd = open('createDB.sql', 'r')

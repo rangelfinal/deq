@@ -1,16 +1,19 @@
-import matplotlib
-matplotlib.use('TkAgg')
-
-import time
 import os
+import sched
+import time
 import uuid
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+import matplotlib
 from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 import DEQ
-import sched
 from settings import Settings
+
+matplotlib.use('TkAgg')
+
+
 
 try:
     import tkinter
@@ -21,6 +24,7 @@ except ImportError:
 s = sched.scheduler(time.time, time.sleep)
 # except ImportError:
 #print("matplotlib não foi encontrado no sistema!")
+
 
 def updateGraph(self):
     for variableID in [1, 2, 3]:
@@ -41,6 +45,7 @@ def updateGraph(self):
             self.potentialGraph['subplot'].draw()
 
     s.enter(1, 1, updateGraph)
+
 
 class simpleapp_tk(tkinter.Tk):
 
@@ -241,9 +246,7 @@ class simpleapp_tk(tkinter.Tk):
         s.enter(1, 1, updateGraph)
 
     def saveConfig(self):
-        configToSave = {}
-        for key, value in self.config.items():
-            configToSave[key] = value.get()
+        self.DBConfig.toggleOn = True
         DEQ.main()
 
     def changeMode(self):
