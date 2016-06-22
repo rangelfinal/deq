@@ -204,37 +204,31 @@ class simpleapp_tk(tkinter.Tk):
 
         # Gráficos
 
-        self.graphPanel = tkinter.Frame(self)
-        self.graphPanel.grid(column=1, row=0, columnspan=5)
+        self.graphPanel = tkinter.Frame(self, bd=1, relief='sunken')
+        self.graphPanel.grid(column=1, row=0, columnspan=5, rowspan=12)
+
+        self.figure = Figure()
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.graphPanel)
 
         self.conductivityGraph = {}
         self.conductivityGraph['frame'] = tkinter.Frame(self.graphPanel)
         self.conductivityGraph['frame'].grid(column=0, row=0, rowspan=2)
-        self.conductivityGraph['figure'] = Figure()
-        self.conductivityGraph['subplot'] = self.conductivityGraph[
-            'figure'].add_subplot(111)
-        self.conductivityGraph['canvas'] = FigureCanvasTkAgg(
-            self.conductivityGraph['figure'], master=self.conductivityGraph['frame'])
-        self.conductivityGraph['canvas'].show()
+        self.conductivityGraph['subplot'] = self.figure.add_subplot(221)
 
         self.pHGraph = {}
         self.pHGraph['frame'] = tkinter.Frame(self.graphPanel)
         self.pHGraph['frame'].grid(column=1, row=0)
-        self.pHGraph['figure'] = Figure()
-        self.pHGraph['subplot'] = self.pHGraph['figure'].add_subplot(111)
-        self.pHGraph['canvas'] = FigureCanvasTkAgg(
-            self.pHGraph['figure'], master=self.pHGraph['frame'])
-        self.pHGraph['canvas'].show()
+        self.pHGraph['subplot'] = self.figure.add_subplot(222)
 
         self.potentialGraph = {}
         self.potentialGraph['frame'] = tkinter.Frame(self.graphPanel)
         self.potentialGraph['frame'].grid(column=1, row=1)
-        self.potentialGraph['figure'] = Figure()
-        self.potentialGraph['subplot'] = self.potentialGraph[
-            'figure'].add_subplot(111)
-        self.potentialGraph['canvas'] = FigureCanvasTkAgg(
-            self.potentialGraph['figure'], master=self.potentialGraph['frame'])
-        self.potentialGraph['canvas'].show()
+        self.potentialGraph['subplot'] = self.figure.add_subplot(223)
+
+        self.canvas.get_tk_widget().grid(column=0, row=0)
+        self.canvas.show()
+
+        tkinter.Tk.update(self)
 
         s.enter(1, 1, self.updateGraph)
 
