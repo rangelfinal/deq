@@ -26,8 +26,12 @@ class Settings:
         else:
             if isinstance(newValue, str):
                 newValue = "'" + newValue + "'"
+            if isinstance(newValue, bool):
+                newValue = int(newValue)
+
             print('UPDATE settings SET ' + column + '=' + str(newValue))
             cursor = db.cursor().execute('UPDATE settings SET ' + column + '=' + str(newValue))
+            db.commit()
 
     def __init__(self):
         self.updateFromDB()

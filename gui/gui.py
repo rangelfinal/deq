@@ -91,8 +91,6 @@ class simpleapp_tk(tkinter.Tk):
         self.config['numberCicles'].set(self.DBConfig.numberCicles)
         self.config['maxConductivity'] = tkinter.DoubleVar()
         self.config['maxConductivity'].set(self.DBConfig.maxConductivity)
-        self.config['toggleOn'] = tkinter.BooleanVar()
-        self.config['toggleOn'].set(self.DBConfig.toggleOn)
 
         self.modeRadio1 = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
             'modeID'], value=1, command=self.changeMode, indicatoron=0)
@@ -240,6 +238,20 @@ class simpleapp_tk(tkinter.Tk):
 
         s.enter(1, 1, self.updateGraph)
 
+    def saveConfigToDb(self):
+        self.DBConfig.toggleSingle = self.config['toggleSingle'].get()
+        self.DBConfig.toggleAdsorption = self.config['toggleAdsorption'].get()
+        self.DBConfig.textDocument = self.config['textDocument'].get()
+        self.DBConfig.timeAdsorption = self.config['timeAdsorption'].get()
+        self.DBConfig.timeDesorption = self.config['timeDesorption'].get()
+        self.DBConfig.minConductivityAdsorption = self.config['minConductivityAdsorption'].get()
+        self.DBConfig.maxConductivityDesorption = self.config['maxConductivityDesorption'].get()
+        self.DBConfig.cutPotentialAdsorption = self.config['cutPotentialAdsorption'].get()
+        self.DBConfig.cutPotentialDesorption = self.config['cutPotentialDesorption'].get()
+        self.DBConfig.numberCicles = self.config['numberCicles'].get()
+        self.DBConfig.maxConductivity = self.config['maxConductivity'].get()
+
+
     def toggleOnClick(self):
         if self.DBConfig.toggleOn == 0:
             self.DBConfig.toggleOn = 1
@@ -248,6 +260,7 @@ class simpleapp_tk(tkinter.Tk):
         if self.DBConfig.toggleOn == 1:
             self.DBConfig.toggleOn = 0
             self.toggleOn.config(text="Ligar")
+            self.saveConfigToDb()
             DEQ.main()
 
     def changeMode(self):

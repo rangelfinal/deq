@@ -25,6 +25,7 @@ def SaveToArduinoTable(dataToSave):
         try:
             cursor.execute(sqlStringTemplate, data, settingsObj.modeID,
                            settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID)
+            db.commit()
         except Exception as e:
             raise
 
