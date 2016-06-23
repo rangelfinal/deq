@@ -188,19 +188,19 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, text="Numero de Ciclos")
         self.numberCiclesLabel.grid(column=0, row=10)
         self.numberCicles = tkinter.Entry(
-            self.leftPanel, textvariable=self.config['numberCicles'], state="disabled")
+            self.leftPanel, textvariable=self.config['numberCicles'])
         self.numberCicles.grid(column=1, row=10, stick='EW')
 
         self.maxConductivityLabel = tkinter.Label(
             self.leftPanel, text="Conductividade Máxima")
         self.maxConductivityLabel.grid(column=0, row=11)
         self.maxConductivity = tkinter.Entry(
-            self.leftPanel, textvariable=self.config['maxConductivity'], state="disabled")
+            self.leftPanel, textvariable=self.config['maxConductivity'])
         self.maxConductivity.grid(column=1, row=11, stick='EW')
 
         self.toggleOn = tkinter.Button(
             self, text="Ligar", command=self.toggleOnClick)
-        self.toggleOn.grid(column=0, columnspan=2, row=12, stick='EW')
+        self.toggleOn.grid(column=0, columnspan=7, row=12, stick='EW')
 
         # Gráficos
 
