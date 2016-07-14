@@ -25,8 +25,13 @@ def SaveToArduinoTable(dataToSave):
 
     for data in dataToSave:
         try:
-            cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID))
-            db.commit()
+            cursor.execute("SELECT value FROM arduino WHERE variableID=" + str(data[0]) + " ORDER BY ID DESC LIMIT 1")
+            if cursor.rowcount != 0:
+                rs = cursor.fetchone()[0]
+                if float(rs) != float(data[1]):
+                    print("Diferente:" + str(rs) + "X" + str(data[1]))
+                    cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID))
+                    db.commit()
         except Exception as e:
             raise
 
@@ -79,14 +84,19 @@ def ArduinoRead(ser):
     for i in range(0, len(entrada)):
         if (entrada[i] == 99): # 99 = c
             valuesFromArduino['condutividade'] = float(entrada[i + 1:i + 8])
+            print("condutividade = " + str(valuesFromArduino['condutividade']))
         if (entrada[i] == 112): # 112 = p
             valuesFromArduino['pH'] = float(entrada[i + 1:i + 8])
+            print("pH = " + str(valuesFromArduino['pH']))
         if (entrada[i] == 97): # 97 = a
             valuesFromArduino['potencialcelula'] = float(entrada[i + 1:i + 8])  # Potencial de Célula
+            print("potencialcelula = " + str(valuesFromArduino['potencialcelula']))
         if (entrada[i] == 110): # 110 = n
             valuesFromArduino['nciclo'] = float(entrada[i + 1:i + 8])
+            print("nciclo = " + str(valuesFromArduino['nciclo']))
         if (entrada[i] == 116): # 116 = t
             valuesFromArduino['temperatura'] = float(entrada[i + 1:i + 8])
+            print("temperatura = " + str(valuesFromArduino['temperatura']))
 
     data = [(1, valuesFromArduino['condutividade']),
             (2, valuesFromArduino['pH']),
@@ -97,49 +107,64 @@ def ArduinoRead(ser):
     SaveToArduinoTable(data)
 
 
-def changeState():
+def changeState(ser):
     settingsObj.stateStartTime = time.time()
 
     if settingsObj.stateID == 1:
         settingsObj.stateID = 2
-        serial.write(b'0,1,0')
+        settingsObj.fonte1 = 0
+        settingsObj.fonte2 = 1
+        settingsObj.solenoide = 0
+        ser.write(b'0,1,0')
         print("De adsorção para dessorção")
 
     else:
         settingsObj.stateID = 1
         if settingsObj.toggleSingle:
-            serial.write(b'1,0,1')
+            settingsObj.fonte1 = 1
+            settingsObj.fonte2 = 0
+            settingsObj.solenoide = 1
+            ser.write(b'1,0,1')
         else:
-            serial.write(b'1,0,0')
+            ser.write(b'1,0,0')
+            settingsObj.fonte1 = 1
+            settingsObj.fonte2 = 0
+            settingsObj.solenoide = 0
         print("De dessorção para adsorção")
 
 
 def shouldChangeStates(triggers):
     if 'timeAdsorption' in triggers:
-        if settingsObj.timeInCurrentState >= settingsObj.timeAdsorption:
-            return true
+        if settingsObj.timeInCurrentState() >= settingsObj.timeAdsorption:
+            print("timeAdsorption")
+            return True
 
     if 'timeDesorption' in triggers:
-        if settingsObj.timeInCurrentState >= settingsObj.timeDesorption:
-            return true
+        if settingsObj.timeInCurrentState() >= settingsObj.timeDesorption:
+            print("timeDesorption")
+            return True
 
     if 'minConductivityAdsorption' in triggers:
         if settingsObj.minConductivityAdsorption > valuesFromArduino['condutividade']:
-            return true
+            print("minConductivityAdsorption")
+            return True
 
     if 'maxConductivityDesorption' in triggers:
         if settingsObj.maxConductivityDesorption < valuesFromArduino['condutividade']:
-            return true
+            print("maxConductivityDesorption")
+            return True
 
     if 'cutPotentialAdsorption' in triggers:
         if settingsObj.cutPotentialAdsorption > valuesFromArduino['potencialcelula']:
-            return true
+            print("cutPotentialAdsorption")
+            return True
 
     if 'cutPotentialDesorption' in triggers:
         if settingsObj.cutPotentialDesorption > valuesFromArduino['potencialcelula']:
-            return true
+            print("cutPotentialDesorption")
+            return True
 
-    return false
+    return False
 
 
 def main():
@@ -187,6 +212,9 @@ def main():
         triggers = ['timeAdsorption', 'timeDesorption', 'minConductivityAdsorption',
                     'maxConductivityDesorption', 'cutPotentialAdsorption', 'cutPotentialDesorption']
 
+    print(triggers)
+    print(settingsObj.modeID)
+
     ArduinoRead(ser)
 
     print("ligado:" + str(settingsObj.toggleOn))
@@ -204,9 +232,9 @@ def main():
         if valuesFromArduino['condutividade'] > settingsObj.maxConductivity:
             break  # NÃO FAZ NADA SE A CONDUTIVIDADE FOR MAIOR QUE A MÁXIMA
 
-        if shouldChangeStates:
+        if shouldChangeStates(triggers):
             print("Trocando de estado")
-            changeState()
+            changeState(ser)
 
     settingsObj.toggleOn = 0
     ser.write(b'0,0,0')

@@ -52,6 +52,10 @@ class simpleapp_tk(tkinter.Tk):
 
         p.start()
 
+        t = threading.Timer(1, self.updateGraph)
+        t.daemon = True
+        t.start()
+
     def turnOff(self):
         if self.DBConfig.toggleOn == 1:
             self.DBConfig.toggleOn = 0
@@ -65,20 +69,21 @@ class simpleapp_tk(tkinter.Tk):
 
     def updateGraph(self):
         for variableID in [1, 2, 3]:
-            cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=? AND variableID=?  ORDER BY ID LIMIT 30', (self.DBConfig.currentUUID, variableID))
+            cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=''?'' AND variableID=?  ORDER BY ID LIMIT 30', (self.DBConfig.currentUUID, variableID))
             result = cursor.fetchall()
+            print(result)
+            self.conductivityGraph['subplot'].set_title("Potencial" + str(variableID))
             if variableID == 1:
                 self.conductivityGraph['subplot'].clear()
                 self.conductivityGraph['subplot'].plot(result)
-                #self.conductivityGraph['subplot'].draw()
+
             if variableID == 2:
                 self.pHGraph['subplot'].clear()
                 self.pHGraph['subplot'].plot(result)
-                #self.pHGraph['subplot'].draw()
+
             if variableID == 3:
                 self.potentialGraph['subplot'].clear()
                 self.potentialGraph['subplot'].plot(result)
-                #self.potentialGraph['subplot'].draw()
 
         if(self.DBConfig.toggleOn == 0):
             self.toggleOn.config(text="Ligar")
@@ -86,10 +91,12 @@ class simpleapp_tk(tkinter.Tk):
         if (self.DBConfig.toggleOn == 1 and not p.is_alive()) or (self.DBConfig.toggleOn == 0 and p.is_alive()):
             self.turnOff()
 
-        t = threading.Timer(1, self.updateGraph)
-        t.daemon = True
-        t.start()
+        self.canvas.draw()
 
+        if (self.DBConfig.toggleOn == 1):
+            t = threading.Timer(1, self.updateGraph)
+            t.daemon = True
+            t.start()
 
     def initialize(self):
         filename = os.path.join(os.getcwd(), 'DEQ.sqlite')
@@ -269,9 +276,6 @@ class simpleapp_tk(tkinter.Tk):
 
         tkinter.Tk.update(self)
 
-        t = threading.Timer(1, self.updateGraph)
-        t.start()
-
     def saveConfigToDb(self):
         self.DBConfig.toggleSingle = self.config['toggleSingle'].get()
         self.DBConfig.toggleAdsorption = self.config['toggleAdsorption'].get()
@@ -328,6 +332,8 @@ class simpleapp_tk(tkinter.Tk):
                 opt.config(state='normal')
             for key, opt in self.potentialOptions.items():
                 opt.config(state='normal')
+
+        self.DBConfig.modeID = self.config['modeID'].get()
 
 if __name__ == "__main__":
     app = simpleapp_tk(None)
