@@ -1,7 +1,9 @@
 import os
-import sched
 import time
 import uuid
+import sqlite3
+from multiprocessing import Process
+import threading
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -18,9 +20,12 @@ except ImportError:
     print("tkinter não foi encontrado no sistema!")
 
 
-s = sched.scheduler(time.time, time.sleep)
 # except ImportError:
 #print("matplotlib não foi encontrado no sistema!")
+
+p = Process(target=DEQ.main)
+
+db = sqlite3.connect('DEQ.sqlite', check_same_thread=False)
 
 class simpleapp_tk(tkinter.Tk):
 
@@ -29,25 +34,62 @@ class simpleapp_tk(tkinter.Tk):
         self.parent = parent
         self.initialize()
 
+    def turnOn(self):
+        if self.DBConfig.toggleOn == 0:
+            self.DBConfig.toggleOn = 1
+
+        self.toggleOn.config(text="Desligar")
+        print("Ligando")
+        self.saveConfigToDb()
+        global p
+        if p.is_alive():
+            p.join()
+
+        # Reseta o processo para que esse possa ser lançado novamente
+
+        p = None
+        p = Process(target=DEQ.main)
+
+        p.start()
+
+    def turnOff(self):
+        if self.DBConfig.toggleOn == 1:
+            self.DBConfig.toggleOn = 0
+
+        if p.is_alive():
+            p.join()
+
+        self.toggleOn.config(text="Ligar")
+        self.saveConfigToDb()
+        print("Desligando")
+
     def updateGraph(self):
         for variableID in [1, 2, 3]:
-            cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=? AND variableID=?  ORDER BY ID LIMIT 30',
-                                         self.DBConfig.currentUUID, variableID)
+            cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=? AND variableID=?  ORDER BY ID LIMIT 30', (self.DBConfig.currentUUID, variableID))
             result = cursor.fetchall()
             if variableID == 1:
-                conductivityGraph['subplot'].clear()
+                self.conductivityGraph['subplot'].clear()
                 self.conductivityGraph['subplot'].plot(result)
-                self.conductivityGraph['subplot'].draw()
+                #self.conductivityGraph['subplot'].draw()
             if variableID == 2:
-                pHGraph['subplot'].clear()
+                self.pHGraph['subplot'].clear()
                 self.pHGraph['subplot'].plot(result)
-                self.pHGraph['subplot'].draw()
+                #self.pHGraph['subplot'].draw()
             if variableID == 3:
-                potentialGraph['subplot'].clear()
+                self.potentialGraph['subplot'].clear()
                 self.potentialGraph['subplot'].plot(result)
-                self.potentialGraph['subplot'].draw()
+                #self.potentialGraph['subplot'].draw()
 
-        s.enter(1, 1, self.updateGraph)
+        if(self.DBConfig.toggleOn == 0):
+            self.toggleOn.config(text="Ligar")
+
+        if (self.DBConfig.toggleOn == 1 and not p.is_alive()) or (self.DBConfig.toggleOn == 0 and p.is_alive()):
+            self.turnOff()
+
+        t = threading.Timer(1, self.updateGraph)
+        t.daemon = True
+        t.start()
+
 
     def initialize(self):
         filename = os.path.join(os.getcwd(), 'DEQ.sqlite')
@@ -61,6 +103,7 @@ class simpleapp_tk(tkinter.Tk):
         self.config = {}
 
         self.DBConfig = Settings()
+        self.DBConfig.toggleOn = 0
 
         self.DBConfig.currentUUID = uuid.uuid4().hex
 
@@ -91,8 +134,6 @@ class simpleapp_tk(tkinter.Tk):
         self.config['numberCicles'].set(self.DBConfig.numberCicles)
         self.config['maxConductivity'] = tkinter.DoubleVar()
         self.config['maxConductivity'].set(self.DBConfig.maxConductivity)
-        self.config['toggleOn'] = tkinter.BooleanVar()
-        self.config['toggleOn'].set(self.DBConfig.toggleOn)
 
         self.modeRadio1 = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
             'modeID'], value=1, command=self.changeMode, indicatoron=0)
@@ -126,13 +167,6 @@ class simpleapp_tk(tkinter.Tk):
         self.toggleAdsorption = tkinter.Checkbutton(
             self.leftPanel, variable=self.config['toggleAdsorption'])
         self.toggleAdsorption.grid(column=1, row=2, stick='EW')
-
-        self.textDocumentLabel = tkinter.Label(
-            self.leftPanel, text="Documento de texto")
-        self.textDocumentLabel.grid(column=0, row=3)
-        self.textDocument = tkinter.Entry(
-            self.leftPanel, textvariable=self.config['textDocument'])
-        self.textDocument.grid(column=1, row=3, stick='EW')
 
         self.timeOptions = {}
 
@@ -190,65 +224,73 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, text="Numero de Ciclos")
         self.numberCiclesLabel.grid(column=0, row=10)
         self.numberCicles = tkinter.Entry(
-            self.leftPanel, textvariable=self.config['numberCicles'], state="disabled")
+            self.leftPanel, textvariable=self.config['numberCicles'])
         self.numberCicles.grid(column=1, row=10, stick='EW')
 
         self.maxConductivityLabel = tkinter.Label(
             self.leftPanel, text="Conductividade Máxima")
         self.maxConductivityLabel.grid(column=0, row=11)
         self.maxConductivity = tkinter.Entry(
-            self.leftPanel, textvariable=self.config['maxConductivity'], state="disabled")
+            self.leftPanel, textvariable=self.config['maxConductivity'])
         self.maxConductivity.grid(column=1, row=11, stick='EW')
 
         self.toggleOn = tkinter.Button(
             self, text="Ligar", command=self.toggleOnClick)
-        self.toggleOn.grid(column=0, columnspan=2, row=12, stick='EW')
+        self.toggleOn.grid(column=0, columnspan=7, row=12, stick='EW')
 
         # Gráficos
 
-        self.graphPanel = tkinter.Frame(self)
-        self.graphPanel.grid(column=1, row=0, columnspan=5)
+        self.graphPanel = tkinter.Frame(self, bd=1, relief='sunken')
+        self.graphPanel.grid(column=1, row=0, columnspan=5, rowspan=12)
+
+        self.figure = Figure()
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.graphPanel)
 
         self.conductivityGraph = {}
         self.conductivityGraph['frame'] = tkinter.Frame(self.graphPanel)
         self.conductivityGraph['frame'].grid(column=0, row=0, rowspan=2)
-        self.conductivityGraph['figure'] = Figure()
-        self.conductivityGraph['subplot'] = self.conductivityGraph[
-            'figure'].add_subplot(111)
-        self.conductivityGraph['canvas'] = FigureCanvasTkAgg(
-            self.conductivityGraph['figure'], master=self.conductivityGraph['frame'])
-        self.conductivityGraph['canvas'].show()
+        self.conductivityGraph['subplot'] = self.figure.add_subplot(221)
+        self.conductivityGraph['subplot'].set_title("Condutividade")
 
         self.pHGraph = {}
         self.pHGraph['frame'] = tkinter.Frame(self.graphPanel)
         self.pHGraph['frame'].grid(column=1, row=0)
-        self.pHGraph['figure'] = Figure()
-        self.pHGraph['subplot'] = self.pHGraph['figure'].add_subplot(111)
-        self.pHGraph['canvas'] = FigureCanvasTkAgg(
-            self.pHGraph['figure'], master=self.pHGraph['frame'])
-        self.pHGraph['canvas'].show()
+        self.pHGraph['subplot'] = self.figure.add_subplot(222)
+        self.pHGraph['subplot'].set_title("pH")
 
         self.potentialGraph = {}
         self.potentialGraph['frame'] = tkinter.Frame(self.graphPanel)
         self.potentialGraph['frame'].grid(column=1, row=1)
-        self.potentialGraph['figure'] = Figure()
-        self.potentialGraph['subplot'] = self.potentialGraph[
-            'figure'].add_subplot(111)
-        self.potentialGraph['canvas'] = FigureCanvasTkAgg(
-            self.potentialGraph['figure'], master=self.potentialGraph['frame'])
-        self.potentialGraph['canvas'].show()
+        self.potentialGraph['subplot'] = self.figure.add_subplot(223)
+        self.potentialGraph['subplot'].set_title("Potencial")
 
-        s.enter(1, 1, self.updateGraph)
+        self.canvas.get_tk_widget().grid(column=0, row=0)
+        self.canvas.show()
+
+        tkinter.Tk.update(self)
+
+        t = threading.Timer(1, self.updateGraph)
+        t.start()
+
+    def saveConfigToDb(self):
+        self.DBConfig.toggleSingle = self.config['toggleSingle'].get()
+        self.DBConfig.toggleAdsorption = self.config['toggleAdsorption'].get()
+        self.DBConfig.textDocument = self.config['textDocument'].get()
+        self.DBConfig.timeAdsorption = self.config['timeAdsorption'].get()
+        self.DBConfig.timeDesorption = self.config['timeDesorption'].get()
+        self.DBConfig.minConductivityAdsorption = self.config['minConductivityAdsorption'].get()
+        self.DBConfig.maxConductivityDesorption = self.config['maxConductivityDesorption'].get()
+        self.DBConfig.cutPotentialAdsorption = self.config['cutPotentialAdsorption'].get()
+        self.DBConfig.cutPotentialDesorption = self.config['cutPotentialDesorption'].get()
+        self.DBConfig.numberCicles = self.config['numberCicles'].get()
+        self.DBConfig.maxConductivity = self.config['maxConductivity'].get()
 
     def toggleOnClick(self):
         if self.DBConfig.toggleOn == 0:
-            self.DBConfig.toggleOn = 1
-            self.toggleOn.config(text="Desligar")
+            self.turnOn()
 
-        if self.DBConfig.toggleOn == 1:
-            self.DBConfig.toggleOn = 0
-            self.toggleOn.config(text="Ligar")
-            DEQ.main()
+        elif self.DBConfig.toggleOn == 1:
+            self.turnOff()
 
     def changeMode(self):
         if self.config['modeID'].get() == 1:
