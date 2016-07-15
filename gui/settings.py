@@ -226,4 +226,7 @@ class Settings:
         self._currentUUID = value
 
     def timeInCurrentState(self):
-        return time.time() - self.stateStartTime
+        if self.stateStartTime != 0:
+            return time.time() - self.stateStartTime
+        else:
+            return 0

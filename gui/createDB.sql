@@ -3,6 +3,7 @@ CREATE TABLE arduino(
   variableID TEXT,
   value TEXT,
   currentTime DATETIME DEFAULT CURRENT_TIMESTAMP,
+  timeInCurrentState NUMBER,
   modeID INTEGER,
   fonte1 BOOLEAN,
   fonte2 BOOLEAN,

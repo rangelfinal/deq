@@ -21,7 +21,7 @@ valuesFromArduino['temperatura'] = 0
 
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
-    sqlStringTemplate = ('''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID) VALUES(?,?,?,?,?,?,?)''')
+    sqlStringTemplate = ('''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState) VALUES(?,?,?,?,?,?,?,?)''')
 
     for data in dataToSave:
         try:
@@ -30,7 +30,7 @@ def SaveToArduinoTable(dataToSave):
                 rs = cursor.fetchone()[0]
                 if float(rs) != float(data[1]):
                     print("Diferente:" + str(rs) + "X" + str(data[1]))
-                    cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID))
+                    cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
                     db.commit()
         except Exception as e:
             raise

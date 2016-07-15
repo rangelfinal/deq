@@ -10,6 +10,9 @@ matplotlib.use('TkAgg')
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+
 
 import DEQ
 from settings import Settings
@@ -69,27 +72,28 @@ class simpleapp_tk(tkinter.Tk):
 
     def updateGraph(self):
         for variableID in [1, 2, 3]:
-            cursor = db.cursor().execute('SELECT value FROM arduino WHERE currentUUID=''?'' AND variableID=?  ORDER BY ID LIMIT 30', (self.DBConfig.currentUUID, variableID))
-            result = cursor.fetchall()
-            print(result)
-            self.conductivityGraph['subplot'].set_title("Potencial" + str(variableID))
-            if variableID == 1:
-                self.conductivityGraph['subplot'].clear()
-                self.conductivityGraph['subplot'].plot(result)
+            cursor = db.cursor().execute('SELECT value, timeInCurrentState FROM (SELECT ID, value, timeInCurrentState FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY ID ASC LIMIT 30) ORDER BY ID DESC', (self.DBConfig.currentUUID, variableID))
+            if cursor.rowcount > 0:
+                result = cursor.fetchall()
+                if variableID == 1:
+                    self.conductivityGraph['subplot'].plot(result, 'go')
+                    self.config['currentConductivity'].set(result[-1][0])
 
-            if variableID == 2:
-                self.pHGraph['subplot'].clear()
-                self.pHGraph['subplot'].plot(result)
+                if variableID == 2:
+                    self.pHGraph['subplot'].plot(result, 'go')
+                    self.config['currentpH'].set(result[-1][0])
 
-            if variableID == 3:
-                self.potentialGraph['subplot'].clear()
-                self.potentialGraph['subplot'].plot(result)
+                if variableID == 3:
+                    self.potentialGraph['subplot'].plot(result, 'go')
+                    self.config['currentPotential'].set(result[-1][0])
 
         if(self.DBConfig.toggleOn == 0):
             self.toggleOn.config(text="Ligar")
 
         if (self.DBConfig.toggleOn == 1 and not p.is_alive()) or (self.DBConfig.toggleOn == 0 and p.is_alive()):
             self.turnOff()
+
+        self.config['timeInCurrentState'].set(int(self.DBConfig.timeInCurrentState()))
 
         self.canvas.draw()
 
@@ -141,25 +145,38 @@ class simpleapp_tk(tkinter.Tk):
         self.config['numberCicles'].set(self.DBConfig.numberCicles)
         self.config['maxConductivity'] = tkinter.DoubleVar()
         self.config['maxConductivity'].set(self.DBConfig.maxConductivity)
+        self.config['timeInCurrentState'] = tkinter.IntVar()
+        self.config['timeInCurrentState'].set(0)
+        self.config['currentConductivity'] = tkinter.DoubleVar()
+        self.config['currentConductivity'].set(0)
+        self.config['currentpH'] = tkinter.DoubleVar()
+        self.config['currentpH'].set(0)
+        self.config['currentPotential'] = tkinter.DoubleVar()
+        self.config['currentPotential'].set(0)
 
-        self.modeRadio1 = tkinter.Radiobutton(self, text="Potenciostático", variable=self.config[
+        self.radioPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
+        self.radioPanel.grid(column=0, row=0, stick='WE')
+
+        self.modeRadio1 = tkinter.Radiobutton(self.radioPanel, text="Potenciostático", variable=self.config[
             'modeID'], value=1, command=self.changeMode, indicatoron=0)
-        self.modeRadio2 = tkinter.Radiobutton(self, text="Galvanostático por Tempo", variable=self.config[
+        self.modeRadio2 = tkinter.Radiobutton(self.radioPanel, text="Galvanostático por Tempo", variable=self.config[
             'modeID'], value=2, command=self.changeMode, indicatoron=0)
-        self.modeRadio3 = tkinter.Radiobutton(self, text="Galvanostático por Condutividade", variable=self.config[
+        self.modeRadio3 = tkinter.Radiobutton(self.radioPanel, text="Galvanostático por Condutividade", variable=self.config[
             'modeID'], value=3, command=self.changeMode, indicatoron=0)
-        self.modeRadio4 = tkinter.Radiobutton(self, text="Galvanostático por Potencial", variable=self.config[
+        self.modeRadio4 = tkinter.Radiobutton(self.radioPanel, text="Galvanostático por Potencial", variable=self.config[
             'modeID'], value=4, command=self.changeMode, indicatoron=0)
-        self.modeRadio5 = tkinter.Radiobutton(self, text="Galvanostático Geral", variable=self.config[
+        self.modeRadio5 = tkinter.Radiobutton(self.radioPanel, text="Galvanostático Geral", variable=self.config[
             'modeID'], value=5, command=self.changeMode, indicatoron=0)
-        self.modeRadio1.grid(column=0, row=0, stick='EW')
-        self.modeRadio2.grid(column=0, row=1, stick='EW')
-        self.modeRadio3.grid(column=0, row=2, stick='EW')
-        self.modeRadio4.grid(column=0, row=3, stick='EW')
-        self.modeRadio5.grid(column=0, row=4, stick='EW')
+        self.modeRadio1.grid(column=0, columnspan=2, row=0, stick='WENS')
+        self.modeRadio2.grid(column=0, row=1, stick='WENS')
+        self.modeRadio3.grid(column=0, row=2, stick='WENS')
+        self.modeRadio4.grid(column=0, row=3, stick='WENS')
+        self.modeRadio5.grid(column=0, row=4, stick='WENS')
+
+        # Painel esquerdo
 
         self.leftPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
-        self.leftPanel.grid(column=0, row=5)
+        self.leftPanel.grid(column=0, row=1, stick='WENS')
 
         self.toggleSingleLabel = tkinter.Label(
             self.leftPanel, text="Single-Pass")
@@ -248,31 +265,68 @@ class simpleapp_tk(tkinter.Tk):
         # Gráficos
 
         self.graphPanel = tkinter.Frame(self, bd=1, relief='sunken')
-        self.graphPanel.grid(column=1, row=0, columnspan=5, rowspan=12)
+        self.graphPanel.grid(column=1, row=0, rowspan=12)
 
         self.figure = Figure()
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.graphPanel)
+        self.gridspec = gridspec.GridSpec(2, 2)
+        self.gridspec.update(hspace=0.3, wspace=0.3)
 
         self.conductivityGraph = {}
-        self.conductivityGraph['frame'] = tkinter.Frame(self.graphPanel)
-        self.conductivityGraph['frame'].grid(column=0, row=0, rowspan=2)
-        self.conductivityGraph['subplot'] = self.figure.add_subplot(221)
+        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[0,:])
         self.conductivityGraph['subplot'].set_title("Condutividade")
+        self.conductivityGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
+        self.conductivityGraph['subplot'].grid(True)
+        self.conductivityGraph['subplot'].set_xlabel("Tempo (s)")
+        self.conductivityGraph['subplot'].set_xbound(lower=0)
 
         self.pHGraph = {}
-        self.pHGraph['frame'] = tkinter.Frame(self.graphPanel)
-        self.pHGraph['frame'].grid(column=1, row=0)
-        self.pHGraph['subplot'] = self.figure.add_subplot(222)
+        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[1,0])
         self.pHGraph['subplot'].set_title("pH")
+        self.pHGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
+        self.pHGraph['subplot'].grid(True)
+        self.pHGraph['subplot'].set_xlabel("Tempo (s)")
+        self.pHGraph['subplot'].set_xbound(lower=0)
 
         self.potentialGraph = {}
-        self.potentialGraph['frame'] = tkinter.Frame(self.graphPanel)
-        self.potentialGraph['frame'].grid(column=1, row=1)
-        self.potentialGraph['subplot'] = self.figure.add_subplot(223)
+        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[1,1])
         self.potentialGraph['subplot'].set_title("Potencial")
+        self.potentialGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
+        self.potentialGraph['subplot'].grid(True)
+        self.potentialGraph['subplot'].set_xlabel("Tempo (s)")
+        self.potentialGraph['subplot'].set_xbound(lower=0)
 
         self.canvas.get_tk_widget().grid(column=0, row=0)
         self.canvas.show()
+
+        # Painel direito
+
+        self.rightPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
+        self.rightPanel.grid(column=2, row=0)
+
+        self.timeInCurrentStateLabel = tkinter.Label(self.rightPanel, text="Tempo no estado atual:")
+        self.timeInCurrentStateLabel.grid(column=0, row=0)
+        self.timeInCurrentState = tkinter.Entry(
+            self.rightPanel, textvariable=self.config['timeInCurrentState'], state='readonly')
+        self.timeInCurrentState.grid(column=0, row=1)
+
+        self.currentConductivityLabel = tkinter.Label(self.rightPanel, text="Condutividade atual:")
+        self.currentConductivityLabel.grid(column=0, row=2)
+        self.currentConductivity = tkinter.Entry(
+            self.rightPanel, textvariable=self.config['currentConductivity'], state='readonly')
+        self.currentConductivity.grid(column=0, row=3)
+
+        self.currentpHLabel = tkinter.Label(self.rightPanel, text="pH atual:")
+        self.currentpHLabel.grid(column=0, row=4)
+        self.currentpH = tkinter.Entry(
+            self.rightPanel, textvariable=self.config['currentpH'], state='readonly')
+        self.currentpH.grid(column=0, row=5)
+
+        self.currentPotentialLabel = tkinter.Label(self.rightPanel, text="Condutividade atual:")
+        self.currentPotentialLabel.grid(column=0, row=6)
+        self.currentPotential = tkinter.Entry(
+            self.rightPanel, textvariable=self.config['currentPotential'], state='readonly')
+        self.currentPotential.grid(column=0, row=7)
 
         tkinter.Tk.update(self)
 
