@@ -72,7 +72,11 @@ class simpleapp_tk(tkinter.Tk):
 
     def updateGraph(self):
         for variableID in [1, 2, 3]:
-            cursor = db.cursor().execute('SELECT value, timeInCurrentState FROM (SELECT ID, value, timeInCurrentState FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC LIMIT 30) ORDER BY ID ASC', (self.DBConfig.currentUUID, variableID))
+            SQLString = 'SELECT value, timeInCurrentState FROM (SELECT ID, value, timeInCurrentState FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC'
+            if self.ShowLast30PointsValue:
+                SQLString += ' LIMIT 30'
+            SQLString += ') ORDER BY ID'
+            cursor = db.cursor().execute(SQLString, (self.DBConfig.currentUUID, variableID))
             result = cursor.fetchall()
             if result != None and result != []:
                 print(result)
@@ -130,6 +134,8 @@ class simpleapp_tk(tkinter.Tk):
             t.start()
 
     def initialize(self):
+        self.attributes('-fullscreen', True)
+
         filename = os.path.join(os.getcwd(), 'DEQ.sqlite')
         print(filename)
         if not os.path.isfile(filename):
@@ -180,6 +186,9 @@ class simpleapp_tk(tkinter.Tk):
         self.config['currentpH'].set(0)
         self.config['currentPotential'] = tkinter.DoubleVar()
         self.config['currentPotential'].set(0)
+
+        self.ShowLast30PointsValue = tkinter.BooleanVar()
+        self.ShowLast30PointsValue.set(False)
 
         self.radioPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
         self.radioPanel.grid(column=0, row=0, stick='WE')
@@ -285,22 +294,31 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, textvariable=self.config['maxConductivity'])
         self.maxConductivity.grid(column=1, row=11, stick='EW')
 
+        self.ShowLast30PointsLabel = tkinter.Label(self.leftPanel, text="Exibir ultimos 30 pontos")
+        self.ShowLast30PointsLabel.grid(column=0,row=12)
+        self.ShowLast30Points = tkinter.Checkbutton(self.leftPanel, variable=self.ShowLast30PointsValue)
+        self.toggleAdsorption.grid(column=1, row=12, stick='EW')
+
         self.toggleOn = tkinter.Button(
             self, text="Ligar", command=self.toggleOnClick)
-        self.toggleOn.grid(column=0, columnspan=7, row=12, stick='EW')
+        self.toggleOn.grid(column=0, row=2, stick='EW')
+
+        self.exitButton = tkinter.Button(
+            self, text="Sair", command=self.exitButtonClick)
+        self.exitButton.grid(column=0, row=3, stick='EW')
 
         # Gráficos
 
         self.graphPanel = tkinter.Frame(self, bd=1, relief='sunken')
-        self.graphPanel.grid(column=1, row=0, rowspan=12)
+        self.graphPanel.grid(column=1, row=0, rowspan=4)
 
-        self.figure = Figure()
+        self.figure = Figure(figsize=(10,10))
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.graphPanel)
-        self.gridspec = gridspec.GridSpec(2, 2)
+        self.gridspec = gridspec.GridSpec(5, 2)
         self.gridspec.update(hspace=0.3, wspace=0.3)
 
         self.conductivityGraph = {}
-        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[0,:])
+        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[:-2,:])
         self.conductivityGraph['subplot'].set_title("Condutividade")
         self.conductivityGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
         self.conductivityGraph['subplot'].grid(True)
@@ -308,7 +326,7 @@ class simpleapp_tk(tkinter.Tk):
         self.conductivityGraph['subplot'].set_xbound(lower=0)
 
         self.pHGraph = {}
-        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[1,0])
+        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:,0])
         self.pHGraph['subplot'].set_title("pH")
         self.pHGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
         self.pHGraph['subplot'].grid(True)
@@ -316,7 +334,7 @@ class simpleapp_tk(tkinter.Tk):
         self.pHGraph['subplot'].set_xbound(lower=0)
 
         self.potentialGraph = {}
-        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[1,1])
+        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:,1])
         self.potentialGraph['subplot'].set_title("Potencial")
         self.potentialGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
         self.potentialGraph['subplot'].grid(True)
@@ -376,6 +394,9 @@ class simpleapp_tk(tkinter.Tk):
 
         elif self.DBConfig.toggleOn == 1:
             self.turnOff()
+
+    def exitButtonClick(self):
+        self.quit()
 
     def changeMode(self):
         if self.config['modeID'].get() == 1:

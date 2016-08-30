@@ -1,0 +1,4 @@
+--no-index
+--find-links pip/
+pyserial
+matplotlib
