@@ -321,14 +321,14 @@ class simpleapp_tk(tkinter.Tk):
 
     def updateGraph(self):
         for variableID in [1, 2, 3]:
-            SQLString = 'SELECT value, timeInCurrentState FROM (SELECT ID, value, timeInCurrentState FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC'
-            if self.ShowLast30PointsValue:
+            SQLString = 'SELECT value, totalTime FROM (SELECT ID, value, totalTime FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC'
+            if self.ShowLast30PointsValue.get():
                 SQLString += ' LIMIT 30'
             SQLString += ') ORDER BY ID'
             cursor = db.cursor().execute(SQLString, (self.DBConfig.currentUUID, variableID))
             result = cursor.fetchall()
+
             if result != None and result != []:
-                print(result)
                 breaks = [i for i in range(1, len(result)) if result[
                     i][0] < result[i - 1][0]]
                 splitedResult = [result[x:y]
@@ -359,8 +359,13 @@ class simpleapp_tk(tkinter.Tk):
                         for result in splitedResult:
                             self.pHGraph['subplot'].plot([item[1] for item in result], [
                                                          item[0] for item in result], 'go-')
-
-                        self.config['currentpH'].set(result[-1][-1][0])
+                        try:
+                            self.config['currentpH'].set(result[-1][-1][0])
+                        except:
+                            try:
+                                self.config['currentpH'].set(result[-1][0])
+                            except:
+                                pass
 
                     else:
                         self.pHGraph['subplot'].plot([item[1] for item in result], [
@@ -372,9 +377,13 @@ class simpleapp_tk(tkinter.Tk):
                         for result in splitedResult:
                             self.potentialGraph['subplot'].plot([item[1] for item in result], [
                                                                 item[0] for item in result], 'go-')
-
-                        self.config['currentPotential'].set(result[-1][-1][0])
-
+                        try:
+                            self.config['currentPotential'].set(result[-1][-1][0])
+                        except:
+                            try:
+                                self.config['currentPotential'].set(result[-1][0])
+                            except:
+                                pass
                     else:
                         self.potentialGraph['subplot'].plot([item[1] for item in result], [
                                                             item[0] for item in result], 'go-')

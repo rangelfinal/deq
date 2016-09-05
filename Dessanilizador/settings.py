@@ -245,3 +245,9 @@ class Settings:
             return time.time() - self.stateStartTime
         else:
             return 0
+
+    def totalTime(self):
+        if self.currentExecutionStartTime != 0:
+            return time.time() - self.currentExecutionStartTime
+        else:
+            return 0

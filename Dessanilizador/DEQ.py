@@ -89,12 +89,12 @@ def ArduinoRead(ser):
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
     sqlStringTemplate = (
-        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState) VALUES(?,?,?,?,?,?,?,?)''')
+        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState, totalTime) VALUES(?,?,?,?,?,?,?,?)''')
 
     for data in dataToSave:
         try:
             cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1,
-                                               settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
+                                               settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState(), settingsObj.totalTime()))
             db.commit()
         except Exception as e:
             raise
