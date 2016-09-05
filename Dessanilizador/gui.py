@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sqlite3
+import threading
 import time
 import uuid
-import sqlite3
 from multiprocessing import Process
-import threading
 
 import matplotlib
-matplotlib.use('TkAgg')
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-import matplotlib.gridspec as gridspec
-import matplotlib.pyplot as plt
-
 
 import DEQ
 from settings import Settings
+
+matplotlib.use('TkAgg')
+
+
 
 try:
     import tkinter
@@ -27,6 +29,7 @@ except ImportError:
 p = Process(target=DEQ.main)
 
 db = sqlite3.connect('DEQ.sqlite', check_same_thread=False)
+
 
 class simpleapp_tk(tkinter.Tk):
 
@@ -79,47 +82,56 @@ class simpleapp_tk(tkinter.Tk):
             result = cursor.fetchall()
             if result != None and result != []:
                 print(result)
-                breaks = [i for i in range(1,len(result)) if result[i][0] < result[i-1][0]]
-                splitedResult = [result[x:y] for x,y in zip([0]+breaks,breaks+[None])]
+                breaks = [i for i in range(1, len(result)) if result[
+                    i][0] < result[i - 1][0]]
+                splitedResult = [result[x:y]
+                                 for x, y in zip([0] + breaks, breaks + [None])]
 
                 if variableID == 1:
                     if breaks:
                         for result in splitedResult:
-                            self.conductivityGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
+                            self.conductivityGraph['subplot'].plot([item[1] for item in result], [
+                                                                   item[0] for item in result], 'go-')
                         try:
-                            self.config['currentConductivity'].set(result[-1][-1][0])
+                            self.config['currentConductivity'].set(
+                                result[-1][-1][0])
                         except:
                             try:
-                                self.config['currentConductivity'].set(result[-1][0])
+                                self.config['currentConductivity'].set(
+                                    result[-1][0])
                             except:
                                 pass
                     else:
-                        self.conductivityGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
+                        self.conductivityGraph['subplot'].plot([item[1] for item in result], [
+                                                               item[0] for item in result], 'go-')
 
                         self.config['currentConductivity'].set(result[-1][0])
 
                 if variableID == 2:
                     if breaks:
                         for result in splitedResult:
-                            self.pHGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
+                            self.pHGraph['subplot'].plot([item[1] for item in result], [
+                                                         item[0] for item in result], 'go-')
 
                         self.config['currentpH'].set(result[-1][-1][0])
 
                     else:
-                        self.pHGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
+                        self.pHGraph['subplot'].plot([item[1] for item in result], [
+                                                     item[0] for item in result], 'go-')
                         self.config['currentpH'].set(result[-1][0])
 
                 if variableID == 3:
                     if breaks:
                         for result in splitedResult:
-                            self.potentialGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
+                            self.potentialGraph['subplot'].plot([item[1] for item in result], [
+                                                                item[0] for item in result], 'go-')
 
                         self.config['currentPotential'].set(result[-1][-1][0])
 
                     else:
-                        self.potentialGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
+                        self.potentialGraph['subplot'].plot([item[1] for item in result], [
+                                                            item[0] for item in result], 'go-')
                         self.config['currentPotential'].set(result[-1][0])
-
 
         if(self.DBConfig.toggleOn == 0):
             self.toggleOn.config(text="Ligar")
@@ -127,7 +139,8 @@ class simpleapp_tk(tkinter.Tk):
         if (self.DBConfig.toggleOn == 1 and not p.is_alive()) or (self.DBConfig.toggleOn == 0 and p.is_alive()):
             self.turnOff()
 
-        self.config['timeInCurrentState'].set(int(self.DBConfig.timeInCurrentState()))
+        self.config['timeInCurrentState'].set(
+            int(self.DBConfig.timeInCurrentState()))
 
         self.canvas.draw()
 
@@ -297,9 +310,11 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, textvariable=self.config['maxConductivity'])
         self.maxConductivity.grid(column=1, row=11, stick='EW')
 
-        self.ShowLast30PointsLabel = tkinter.Label(self.leftPanel, text="Exibir ultimos 30 pontos")
-        self.ShowLast30PointsLabel.grid(column=0,row=12)
-        self.ShowLast30Points = tkinter.Checkbutton(self.leftPanel, variable=self.ShowLast30PointsValue)
+        self.ShowLast30PointsLabel = tkinter.Label(
+            self.leftPanel, text="Exibir ultimos 30 pontos")
+        self.ShowLast30PointsLabel.grid(column=0, row=12)
+        self.ShowLast30Points = tkinter.Checkbutton(
+            self.leftPanel, variable=self.ShowLast30PointsValue)
         self.toggleAdsorption.grid(column=1, row=12, stick='EW')
 
         self.toggleOn = tkinter.Button(
@@ -315,31 +330,36 @@ class simpleapp_tk(tkinter.Tk):
         self.graphPanel = tkinter.Frame(self, bd=1, relief='sunken')
         self.graphPanel.grid(column=1, row=0, rowspan=4)
 
-        self.figure = Figure(figsize=(10,10))
+        self.figure = Figure(figsize=(10, 10))
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.graphPanel)
         self.gridspec = gridspec.GridSpec(5, 2)
         self.gridspec.update(hspace=0.3, wspace=0.3)
 
         self.conductivityGraph = {}
-        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[:-2,:])
+        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[
+                                                                    :-2, :])
         self.conductivityGraph['subplot'].set_title("Condutividade")
-        self.conductivityGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
+        self.conductivityGraph['subplot'].tick_params(
+            direction='inout', length=6, width=2, colors='b')
         self.conductivityGraph['subplot'].grid(True)
         self.conductivityGraph['subplot'].set_xlabel("Tempo (s)")
         self.conductivityGraph['subplot'].set_xbound(lower=0)
 
         self.pHGraph = {}
-        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:,0])
+        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:, 0])
         self.pHGraph['subplot'].set_title("pH")
-        self.pHGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
+        self.pHGraph['subplot'].tick_params(
+            direction='inout', length=6, width=2, colors='b')
         self.pHGraph['subplot'].grid(True)
         self.pHGraph['subplot'].set_xlabel("Tempo (s)")
         self.pHGraph['subplot'].set_xbound(lower=0)
 
         self.potentialGraph = {}
-        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:,1])
+        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[
+                                                                 3:, 1])
         self.potentialGraph['subplot'].set_title("Potencial")
-        self.potentialGraph['subplot'].tick_params(direction='inout', length=6, width=2, colors='b')
+        self.potentialGraph['subplot'].tick_params(
+            direction='inout', length=6, width=2, colors='b')
         self.potentialGraph['subplot'].grid(True)
         self.potentialGraph['subplot'].set_xlabel("Tempo (s)")
         self.potentialGraph['subplot'].set_xbound(lower=0)
@@ -352,13 +372,15 @@ class simpleapp_tk(tkinter.Tk):
         self.rightPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
         self.rightPanel.grid(column=2, row=0)
 
-        self.timeInCurrentStateLabel = tkinter.Label(self.rightPanel, text="Tempo no estado atual:")
+        self.timeInCurrentStateLabel = tkinter.Label(
+            self.rightPanel, text="Tempo no estado atual:")
         self.timeInCurrentStateLabel.grid(column=0, row=0)
         self.timeInCurrentState = tkinter.Entry(
             self.rightPanel, textvariable=self.config['timeInCurrentState'], state='readonly')
         self.timeInCurrentState.grid(column=0, row=1)
 
-        self.currentConductivityLabel = tkinter.Label(self.rightPanel, text="Condutividade atual:")
+        self.currentConductivityLabel = tkinter.Label(
+            self.rightPanel, text="Condutividade atual:")
         self.currentConductivityLabel.grid(column=0, row=2)
         self.currentConductivity = tkinter.Entry(
             self.rightPanel, textvariable=self.config['currentConductivity'], state='readonly')
@@ -370,7 +392,8 @@ class simpleapp_tk(tkinter.Tk):
             self.rightPanel, textvariable=self.config['currentpH'], state='readonly')
         self.currentpH.grid(column=0, row=5)
 
-        self.currentPotentialLabel = tkinter.Label(self.rightPanel, text="Condutividade atual:")
+        self.currentPotentialLabel = tkinter.Label(
+            self.rightPanel, text="Condutividade atual:")
         self.currentPotentialLabel.grid(column=0, row=6)
         self.currentPotential = tkinter.Entry(
             self.rightPanel, textvariable=self.config['currentPotential'], state='readonly')
@@ -384,10 +407,14 @@ class simpleapp_tk(tkinter.Tk):
         self.DBConfig.textDocument = self.config['textDocument'].get()
         self.DBConfig.timeAdsorption = self.config['timeAdsorption'].get()
         self.DBConfig.timeDesorption = self.config['timeDesorption'].get()
-        self.DBConfig.minConductivityAdsorption = self.config['minConductivityAdsorption'].get()
-        self.DBConfig.maxConductivityDesorption = self.config['maxConductivityDesorption'].get()
-        self.DBConfig.cutPotentialAdsorption = self.config['cutPotentialAdsorption'].get()
-        self.DBConfig.cutPotentialDesorption = self.config['cutPotentialDesorption'].get()
+        self.DBConfig.minConductivityAdsorption = self.config[
+            'minConductivityAdsorption'].get()
+        self.DBConfig.maxConductivityDesorption = self.config[
+            'maxConductivityDesorption'].get()
+        self.DBConfig.cutPotentialAdsorption = self.config[
+            'cutPotentialAdsorption'].get()
+        self.DBConfig.cutPotentialDesorption = self.config[
+            'cutPotentialDesorption'].get()
         self.DBConfig.numberCicles = self.config['numberCicles'].get()
         self.DBConfig.maxConductivity = self.config['maxConductivity'].get()
 

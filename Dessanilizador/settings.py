@@ -97,7 +97,8 @@ class Settings:
 
     @property
     def minConductivityAdsorption(self):
-        self._minConductivityAdsorption = self.updateFromDB('minConductivityAdsorption')
+        self._minConductivityAdsorption = self.updateFromDB(
+            'minConductivityAdsorption')
         return self._minConductivityAdsorption
 
     @minConductivityAdsorption.setter
@@ -107,7 +108,8 @@ class Settings:
 
     @property
     def maxConductivityDesorption(self):
-        self._maxConductivityDesorption = self.updateFromDB('maxConductivityDesorption')
+        self._maxConductivityDesorption = self.updateFromDB(
+            'maxConductivityDesorption')
         return self._maxConductivityDesorption
 
     @maxConductivityDesorption.setter
@@ -117,7 +119,8 @@ class Settings:
 
     @property
     def cutPotentialAdsorption(self):
-        self._cutPotentialAdsorption = self.updateFromDB('cutPotentialAdsorption')
+        self._cutPotentialAdsorption = self.updateFromDB(
+            'cutPotentialAdsorption')
         return self._cutPotentialAdsorption
 
     @cutPotentialAdsorption.setter
@@ -127,7 +130,8 @@ class Settings:
 
     @property
     def cutPotentialDesorption(self):
-        self._cutPotentialDesorption = self.updateFromDB('cutPotentialDesorption')
+        self._cutPotentialDesorption = self.updateFromDB(
+            'cutPotentialDesorption')
         return self._cutPotentialDesorption
 
     @cutPotentialDesorption.setter
@@ -224,9 +228,11 @@ class Settings:
     def currentUUID(self, value):
         self.updateDB('currentUUID', value)
         self._currentUUID = value
+
     @property
     def currentExecutionStartTime(self):
-        self._currentExecutionStartTime = self.updateFromDB('currentExecutionStartTime')
+        self._currentExecutionStartTime = self.updateFromDB(
+            'currentExecutionStartTime')
         return self._currentExecutionStartTime
 
     @currentExecutionStartTime.setter

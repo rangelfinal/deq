@@ -7,13 +7,14 @@ import time
 import serial
 import serial.tools.list_ports
 
+from settings import Settings
+
 #import tkinter
 #from tkinter import messagebox
 
-from settings import Settings
 
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
-settingsObj = Settings() # Cria um novo objeto para armazenar configurações
+settingsObj = Settings()  # Cria um novo objeto para armazenar configurações
 valuesFromArduino = {}
 valuesFromArduino['condutividade'] = 0
 valuesFromArduino['pH'] = 0
@@ -21,13 +22,16 @@ valuesFromArduino['potencialcelula'] = 0
 valuesFromArduino['nciclo'] = 0
 valuesFromArduino['temperatura'] = 0
 
+
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
-    sqlStringTemplate = ('''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState) VALUES(?,?,?,?,?,?,?,?)''')
+    sqlStringTemplate = (
+        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState) VALUES(?,?,?,?,?,?,?,?)''')
 
     for data in dataToSave:
         try:
-            cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
+            cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1,
+                                               settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
             db.commit()
         except Exception as e:
             raise
@@ -79,19 +83,21 @@ def ArduinoRead(ser):
     # Procura pelos caractéres identificadores das variáveis na string do
     # arduino
     for i in range(0, len(entrada)):
-        if (entrada[i] == 99): # 99 = c
+        if (entrada[i] == 99):  # 99 = c
             valuesFromArduino['condutividade'] = float(entrada[i + 1:i + 8])
             print("condutividade = " + str(valuesFromArduino['condutividade']))
-        if (entrada[i] == 112): # 112 = p
+        if (entrada[i] == 112):  # 112 = p
             valuesFromArduino['pH'] = float(entrada[i + 1:i + 8])
             print("pH = " + str(valuesFromArduino['pH']))
-        if (entrada[i] == 97): # 97 = a
-            valuesFromArduino['potencialcelula'] = float(entrada[i + 1:i + 8])  # Potencial de Célula
-            print("potencialcelula = " + str(valuesFromArduino['potencialcelula']))
-        if (entrada[i] == 110): # 110 = n
+        if (entrada[i] == 97):  # 97 = a
+            valuesFromArduino['potencialcelula'] = float(
+                entrada[i + 1:i + 8])  # Potencial de Célula
+            print("potencialcelula = " +
+                  str(valuesFromArduino['potencialcelula']))
+        if (entrada[i] == 110):  # 110 = n
             valuesFromArduino['nciclo'] = float(entrada[i + 1:i + 8])
             print("nciclo = " + str(valuesFromArduino['nciclo']))
-        if (entrada[i] == 116): # 116 = t
+        if (entrada[i] == 116):  # 116 = t
             valuesFromArduino['temperatura'] = float(entrada[i + 1:i + 8])
             print("temperatura = " + str(valuesFromArduino['temperatura']))
 
@@ -186,10 +192,12 @@ def main():
     # Inicia o Arduino no estado correto
     import time
 
-    print('%d;%d;%d' % (settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide))
+    print('%d;%d;%d' % (settingsObj.fonte1,
+                        settingsObj.fonte2, settingsObj.solenoide))
     ser.write(b'0,0,0')
     time.sleep(1)
-    ser.write(b'%d;%d;%d' % (settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide))
+    ser.write(b'%d;%d;%d' % (settingsObj.fonte1,
+                             settingsObj.fonte2, settingsObj.solenoide))
     print("Inicializando Arduino")
 
     # Marca o tempo de início do primeiro estado
@@ -218,14 +226,16 @@ def main():
     ArduinoRead(ser)
 
     print("ligado:" + str(settingsObj.toggleOn))
-    print("ciclo:" + str(valuesFromArduino['nciclo']) + "/" + str(settingsObj.numberCicles))
+    print("ciclo:" +
+          str(valuesFromArduino['nciclo']) + "/" + str(settingsObj.numberCicles))
 
     while settingsObj.toggleOn and valuesFromArduino['nciclo'] < settingsObj.numberCicles:
 
         print("ligado:" + str(settingsObj.toggleOn))
-        print("ciclo:" + str(valuesFromArduino['nciclo']) + "/" + str(settingsObj.numberCicles))
+        print(
+            "ciclo:" + str(valuesFromArduino['nciclo']) + "/" + str(settingsObj.numberCicles))
 
-        time.sleep(1) # Aguarda 1 segundo
+        time.sleep(1)  # Aguarda 1 segundo
         ArduinoRead(ser)
 
         if valuesFromArduino['condutividade'] > settingsObj.maxConductivity:
