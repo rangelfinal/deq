@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sqlite3
 import sys
 import time
@@ -25,15 +27,8 @@ def SaveToArduinoTable(dataToSave):
 
     for data in dataToSave:
         try:
-            cursor.execute('SELECT value FROM arduino WHERE variableID=? AND currentUUID=''?'' ORDER BY ID DESC LIMIT 1', (data[0], settingsObj.currentUUID))
-            print("SELECT value FROM arduino WHERE variableID=%s AND currentUUID=""%s"" ORDER BY ID DESC LIMIT 1", data[0], settingsObj.currentUUID)
-            rs = cursor.fetchone()
-            if rs == None or rs == [] or float(rs[0]) != float(data[1]):
-                if rs != None and rs != []:
-                    print("Diferente:" + str(rs[0]) + "X" + str(data[1]))
-                cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
-                db.commit()
-                print("?????")
+            cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
+            db.commit()
         except Exception as e:
             raise
 
@@ -50,7 +45,7 @@ def ArduinoSetup():
 
     for p in ports:
 
-        if "HL-340" in p[1] or "Arduino" in p[1] or "Serial" in p[1]:
+        if "HL-340" in p[1] or "Arduino" in p[1] or "Serial" or "CH340" in p[1]:
             COMstr = p[0]
 
     if COMstr == "":
@@ -189,8 +184,12 @@ def main():
         settingsObj.stateID = 2
 
     # Inicia o Arduino no estado correto
+    import time
+
     print('%d;%d;%d' % (settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide))
-    ser.write(('%d;%d;%d' % (settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)).encode('utf-8'))
+    ser.write(b'0,0,0')
+    time.sleep(1)
+    ser.write(b'%d;%d;%d' % (settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide))
     print("Inicializando Arduino")
 
     # Marca o tempo de início do primeiro estado

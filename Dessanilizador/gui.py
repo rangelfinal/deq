@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import time
 import uuid
@@ -20,11 +22,7 @@ from settings import Settings
 try:
     import tkinter
 except ImportError:
-    print("tkinter não foi encontrado no sistema!")
-
-
-# except ImportError:
-#print("matplotlib não foi encontrado no sistema!")
+    print("tkinter nao foi encontrado no sistema!")
 
 p = Process(target=DEQ.main)
 
@@ -43,6 +41,7 @@ class simpleapp_tk(tkinter.Tk):
 
         self.toggleOn.config(text="Desligar")
         print("Ligando")
+        self.DBConfig.currentUUID = uuid.uuid4().hex
         self.saveConfigToDb()
         global p
         if p.is_alive():
@@ -87,9 +86,13 @@ class simpleapp_tk(tkinter.Tk):
                     if breaks:
                         for result in splitedResult:
                             self.conductivityGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
-
-                        self.config['currentConductivity'].set(result[-1][-1][0])
-
+                        try:
+                            self.config['currentConductivity'].set(result[-1][-1][0])
+                        except:
+                            try:
+                                self.config['currentConductivity'].set(result[-1][0])
+                            except:
+                                pass
                     else:
                         self.conductivityGraph['subplot'].plot([item[1] for item in result], [item[0] for item in result], 'go-')
 
@@ -396,6 +399,7 @@ class simpleapp_tk(tkinter.Tk):
             self.turnOff()
 
     def exitButtonClick(self):
+        self.turnOff()
         self.quit()
 
     def changeMode(self):
