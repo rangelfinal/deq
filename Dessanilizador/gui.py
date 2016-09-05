@@ -86,9 +86,8 @@ class simpleapp_tk(tkinter.Tk):
         self.config['currentpH'].set(0)
         self.config['currentPotential'] = tkinter.DoubleVar()
         self.config['currentPotential'].set(0)
-
-        self.ShowLast30PointsValue = tkinter.BooleanVar()
-        self.ShowLast30PointsValue.set(False)
+        self.config['showLast30Points'] = tkinter.BooleanVar()
+        self.config['showLast30Points'].set(0)
 
         self.radioPanel = tkinter.Frame(self, relief='raised', borderwidth=1)
         self.radioPanel.grid(column=0, row=0, stick='WE')
@@ -198,8 +197,8 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, text="Exibir ultimos 30 pontos")
         self.ShowLast30PointsLabel.grid(column=0, row=12)
         self.ShowLast30Points = tkinter.Checkbutton(
-            self.leftPanel, variable=self.ShowLast30PointsValue)
-        self.toggleAdsorption.grid(column=1, row=12, stick='EW')
+            self.leftPanel, variable=self.config['showLast30Points'])
+        self.ShowLast30Points.grid(column=1, row=12, stick='EW')
 
         self.toggleOn = tkinter.Button(
             self, text="Ligar", command=self.toggleOnClick)
@@ -322,7 +321,7 @@ class simpleapp_tk(tkinter.Tk):
     def updateGraph(self):
         for variableID in [1, 2, 3]:
             SQLString = 'SELECT value, totalTime FROM (SELECT ID, value, totalTime FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC'
-            if self.ShowLast30PointsValue.get():
+            if self.config['showLast30Points'].get():
                 SQLString += ' LIMIT 30'
             SQLString += ') ORDER BY ID'
             cursor = db.cursor().execute(SQLString, (self.DBConfig.currentUUID, variableID))

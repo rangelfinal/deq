@@ -250,4 +250,4 @@ class Settings:
         if self.currentExecutionStartTime != 0:
             return time.time() - self.currentExecutionStartTime
         else:
-            return 0
+            return 0    
