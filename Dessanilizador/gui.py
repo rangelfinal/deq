@@ -19,12 +19,7 @@ from settings import Settings
 
 matplotlib.use('TkAgg')
 
-
-
-try:
-    import tkinter
-except ImportError:
-    print("tkinter nao foi encontrado no sistema!")
+import tkinter
 
 p = Process(target=DEQ.main)
 
@@ -37,117 +32,6 @@ class simpleapp_tk(tkinter.Tk):
         tkinter.Tk.__init__(self, parent)
         self.parent = parent
         self.initialize()
-
-    def turnOn(self):
-        if self.DBConfig.toggleOn == 0:
-            self.DBConfig.toggleOn = 1
-
-        self.toggleOn.config(text="Desligar")
-        print("Ligando")
-        self.DBConfig.currentUUID = uuid.uuid4().hex
-        self.saveConfigToDb()
-        global p
-        if p.is_alive():
-            p.join()
-
-        # Reseta o processo para que esse possa ser lançado novamente
-
-        p = None
-        p = Process(target=DEQ.main)
-
-        p.start()
-
-        t = threading.Timer(1, self.updateGraph)
-        t.daemon = True
-        t.start()
-
-    def turnOff(self):
-        if self.DBConfig.toggleOn == 1:
-            self.DBConfig.toggleOn = 0
-
-        if p.is_alive():
-            p.join()
-
-        self.toggleOn.config(text="Ligar")
-        self.saveConfigToDb()
-        print("Desligando")
-
-    def updateGraph(self):
-        for variableID in [1, 2, 3]:
-            SQLString = 'SELECT value, timeInCurrentState FROM (SELECT ID, value, timeInCurrentState FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC'
-            if self.ShowLast30PointsValue:
-                SQLString += ' LIMIT 30'
-            SQLString += ') ORDER BY ID'
-            cursor = db.cursor().execute(SQLString, (self.DBConfig.currentUUID, variableID))
-            result = cursor.fetchall()
-            if result != None and result != []:
-                print(result)
-                breaks = [i for i in range(1, len(result)) if result[
-                    i][0] < result[i - 1][0]]
-                splitedResult = [result[x:y]
-                                 for x, y in zip([0] + breaks, breaks + [None])]
-
-                if variableID == 1:
-                    if breaks:
-                        for result in splitedResult:
-                            self.conductivityGraph['subplot'].plot([item[1] for item in result], [
-                                                                   item[0] for item in result], 'go-')
-                        try:
-                            self.config['currentConductivity'].set(
-                                result[-1][-1][0])
-                        except:
-                            try:
-                                self.config['currentConductivity'].set(
-                                    result[-1][0])
-                            except:
-                                pass
-                    else:
-                        self.conductivityGraph['subplot'].plot([item[1] for item in result], [
-                                                               item[0] for item in result], 'go-')
-
-                        self.config['currentConductivity'].set(result[-1][0])
-
-                if variableID == 2:
-                    if breaks:
-                        for result in splitedResult:
-                            self.pHGraph['subplot'].plot([item[1] for item in result], [
-                                                         item[0] for item in result], 'go-')
-
-                        self.config['currentpH'].set(result[-1][-1][0])
-
-                    else:
-                        self.pHGraph['subplot'].plot([item[1] for item in result], [
-                                                     item[0] for item in result], 'go-')
-                        self.config['currentpH'].set(result[-1][0])
-
-                if variableID == 3:
-                    if breaks:
-                        for result in splitedResult:
-                            self.potentialGraph['subplot'].plot([item[1] for item in result], [
-                                                                item[0] for item in result], 'go-')
-
-                        self.config['currentPotential'].set(result[-1][-1][0])
-
-                    else:
-                        self.potentialGraph['subplot'].plot([item[1] for item in result], [
-                                                            item[0] for item in result], 'go-')
-                        self.config['currentPotential'].set(result[-1][0])
-
-        if(self.DBConfig.toggleOn == 0):
-            self.toggleOn.config(text="Ligar")
-
-        if (self.DBConfig.toggleOn == 1 and not p.is_alive()) or (self.DBConfig.toggleOn == 0 and p.is_alive()):
-            self.turnOff()
-
-        self.config['timeInCurrentState'].set(
-            int(self.DBConfig.timeInCurrentState()))
-
-        self.canvas.draw()
-
-        if (self.DBConfig.toggleOn == 1):
-            t = threading.Timer(1, self.updateGraph)
-            t.daemon = True
-            t.start()
 
     def initialize(self):
         self.attributes('-fullscreen', True)
@@ -400,6 +284,117 @@ class simpleapp_tk(tkinter.Tk):
         self.currentPotential.grid(column=0, row=7)
 
         tkinter.Tk.update(self)
+
+    def turnOn(self):
+        if self.DBConfig.toggleOn == 0:
+            self.DBConfig.toggleOn = 1
+
+        self.toggleOn.config(text="Desligar")
+        print("Ligando")
+        self.DBConfig.currentUUID = uuid.uuid4().hex
+        self.saveConfigToDb()
+        global p
+        if p.is_alive():
+            p.join()
+
+        # Reseta o processo para que esse possa ser lançado novamente
+
+        p = None
+        p = Process(target=DEQ.main)
+
+        p.start()
+
+        t = threading.Timer(1, self.updateGraph)
+        t.daemon = True
+        t.start()
+
+    def turnOff(self):
+        if self.DBConfig.toggleOn == 1:
+            self.DBConfig.toggleOn = 0
+
+        if p.is_alive():
+            p.join()
+
+        self.toggleOn.config(text="Ligar")
+        self.saveConfigToDb()
+        print("Desligando")
+
+    def updateGraph(self):
+        for variableID in [1, 2, 3]:
+            SQLString = 'SELECT value, timeInCurrentState FROM (SELECT ID, value, timeInCurrentState FROM arduino WHERE currentUUID=''?'' AND variableID=? ORDER BY timeInCurrentState DESC'
+            if self.ShowLast30PointsValue:
+                SQLString += ' LIMIT 30'
+            SQLString += ') ORDER BY ID'
+            cursor = db.cursor().execute(SQLString, (self.DBConfig.currentUUID, variableID))
+            result = cursor.fetchall()
+            if result != None and result != []:
+                print(result)
+                breaks = [i for i in range(1, len(result)) if result[
+                    i][0] < result[i - 1][0]]
+                splitedResult = [result[x:y]
+                                 for x, y in zip([0] + breaks, breaks + [None])]
+
+                if variableID == 1:
+                    if breaks:
+                        for result in splitedResult:
+                            self.conductivityGraph['subplot'].plot([item[1] for item in result], [
+                                                                   item[0] for item in result], 'go-')
+                        try:
+                            self.config['currentConductivity'].set(
+                                result[-1][-1][0])
+                        except:
+                            try:
+                                self.config['currentConductivity'].set(
+                                    result[-1][0])
+                            except:
+                                pass
+                    else:
+                        self.conductivityGraph['subplot'].plot([item[1] for item in result], [
+                                                               item[0] for item in result], 'go-')
+
+                        self.config['currentConductivity'].set(result[-1][0])
+
+                if variableID == 2:
+                    if breaks:
+                        for result in splitedResult:
+                            self.pHGraph['subplot'].plot([item[1] for item in result], [
+                                                         item[0] for item in result], 'go-')
+
+                        self.config['currentpH'].set(result[-1][-1][0])
+
+                    else:
+                        self.pHGraph['subplot'].plot([item[1] for item in result], [
+                                                     item[0] for item in result], 'go-')
+                        self.config['currentpH'].set(result[-1][0])
+
+                if variableID == 3:
+                    if breaks:
+                        for result in splitedResult:
+                            self.potentialGraph['subplot'].plot([item[1] for item in result], [
+                                                                item[0] for item in result], 'go-')
+
+                        self.config['currentPotential'].set(result[-1][-1][0])
+
+                    else:
+                        self.potentialGraph['subplot'].plot([item[1] for item in result], [
+                                                            item[0] for item in result], 'go-')
+                        self.config['currentPotential'].set(result[-1][0])
+
+        if(self.DBConfig.toggleOn == 0):
+            self.toggleOn.config(text="Ligar")
+
+        if (self.DBConfig.toggleOn == 1 and not p.is_alive()) or (self.DBConfig.toggleOn == 0 and p.is_alive()):
+            self.turnOff()
+
+        self.config['timeInCurrentState'].set(
+            int(self.DBConfig.timeInCurrentState()))
+
+        self.canvas.draw()
+
+        if (self.DBConfig.toggleOn == 1):
+            t = threading.Timer(1, self.updateGraph)
+            t.daemon = True
+            t.start()
 
     def saveConfigToDb(self):
         self.DBConfig.toggleSingle = self.config['toggleSingle'].get()

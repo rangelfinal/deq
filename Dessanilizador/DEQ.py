@@ -3,14 +3,10 @@
 import sqlite3
 import sys
 import time
-
 import serial
 import serial.tools.list_ports
 
 from settings import Settings
-
-#import tkinter
-#from tkinter import messagebox
 
 
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
@@ -22,26 +18,8 @@ valuesFromArduino['potencialcelula'] = 0
 valuesFromArduino['nciclo'] = 0
 valuesFromArduino['temperatura'] = 0
 
-
-def SaveToArduinoTable(dataToSave):
-    cursor = db.cursor()
-    sqlStringTemplate = (
-        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState) VALUES(?,?,?,?,?,?,?,?)''')
-
-    for data in dataToSave:
-        try:
-            cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1,
-                                               settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
-            db.commit()
-        except Exception as e:
-            raise
-
-    return True
-
 # Função que setará o Arduino, escolhendo automaticamnte a porta em que
 # ele está conectado e abrindo a sessão
-
-
 def ArduinoSetup():
 
     ports = list(serial.tools.list_ports.comports())
@@ -74,8 +52,6 @@ def ArduinoSetup():
 
 # Lê as informações vindas do arduino e salva no DB, o tempo de início da
 # execução é o argumento
-
-
 def ArduinoRead(ser):
 
     entrada = ser.readline()  # atribui à variável entrada uma linha vinda do Arduino
@@ -108,6 +84,22 @@ def ArduinoRead(ser):
             (5, valuesFromArduino['temperatura'])]
 
     SaveToArduinoTable(data)
+
+
+def SaveToArduinoTable(dataToSave):
+    cursor = db.cursor()
+    sqlStringTemplate = (
+        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState) VALUES(?,?,?,?,?,?,?,?)''')
+
+    for data in dataToSave:
+        try:
+            cursor.execute(sqlStringTemplate, (data[0], data[1], settingsObj.modeID, settingsObj.fonte1,
+                                               settingsObj.fonte2, settingsObj.solenoide, settingsObj.currentUUID, settingsObj.timeInCurrentState()))
+            db.commit()
+        except Exception as e:
+            raise
+
+    return True
 
 
 def changeState(ser):
@@ -190,12 +182,10 @@ def main():
         settingsObj.stateID = 2
 
     # Inicia o Arduino no estado correto
-    import time
-
     print('%d;%d;%d' % (settingsObj.fonte1,
                         settingsObj.fonte2, settingsObj.solenoide))
     ser.write(b'0,0,0')
-    time.sleep(1)
+    time.sleep(3)
     ser.write(b'%d;%d;%d' % (settingsObj.fonte1,
                              settingsObj.fonte2, settingsObj.solenoide))
     print("Inicializando Arduino")
