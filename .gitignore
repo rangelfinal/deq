@@ -7,3 +7,4 @@ bower_components
 DEQ.sqlite
 *.7z
 *.pyc
+*.zip
