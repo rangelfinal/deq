@@ -248,6 +248,9 @@ class Settings:
 
     def totalTime(self):
         if self.currentExecutionStartTime != 0:
-            return time.time() - self.currentExecutionStartTime
+            try:
+                return time.time() - self.currentExecutionStartTime
+            except:
+                return 0
         else:
             return 0    

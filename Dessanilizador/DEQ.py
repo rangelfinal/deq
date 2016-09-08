@@ -89,7 +89,7 @@ def ArduinoRead(ser):
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
     sqlStringTemplate = (
-        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState, totalTime) VALUES(?,?,?,?,?,?,?,?)''')
+        '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState, totalTime) VALUES(?,?,?,?,?,?,?,?,?)''')
 
     for data in dataToSave:
         try:
@@ -185,7 +185,10 @@ def main():
     print('%d;%d;%d' % (settingsObj.fonte1,
                         settingsObj.fonte2, settingsObj.solenoide))
     ser.write(b'0,0,0')
-    time.sleep(3)
+    time.sleep(5)
+    ser.write(b'%d;%d;%d' % (settingsObj.fonte1,
+                             settingsObj.fonte2, settingsObj.solenoide))
+    time.sleep(5)
     ser.write(b'%d;%d;%d' % (settingsObj.fonte1,
                              settingsObj.fonte2, settingsObj.solenoide))
     print("Inicializando Arduino")

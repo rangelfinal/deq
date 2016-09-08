@@ -291,6 +291,7 @@ class simpleapp_tk(tkinter.Tk):
         self.toggleOn.config(text="Desligar")
         print("Ligando")
         self.DBConfig.currentUUID = uuid.uuid4().hex
+        self.DBConfig.currentExecutionStartTime = time.time()
         self.saveConfigToDb()
         global p
         if p.is_alive():
