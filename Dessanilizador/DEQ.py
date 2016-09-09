@@ -5,6 +5,7 @@ import sys
 import time
 import serial
 import serial.tools.list_ports
+from tkinter import messagebox
 
 from settings import Settings
 
@@ -32,7 +33,7 @@ def ArduinoSetup():
 
     if COMstr == "":
         print("Arduino não encontrado!")
-        #tkinter.messagebox.showerror("Erro", "Arduino não encontrado!")
+        #messagebox.showerror("Erro", "Arduino não encontrado!")
         settingsObj.toggleOn = 0
         return False
 
@@ -44,7 +45,7 @@ def ArduinoSetup():
             ser.open()
         except:
             print("Erro ao conectar com o Arduino!")
-            #tkinter.messagebox.showerror("Erro", "Erro ao conectar com o Arduino!")
+            #messagebox.showerror("Erro", "Erro ao conectar com o Arduino!")
             settingsObj.toggleOn = 0
             return False
 
@@ -147,22 +148,22 @@ def shouldChangeStates(triggers):
             return True
 
     if 'minConductivityAdsorption' in triggers:
-        if settingsObj.minConductivityAdsorption > valuesFromArduino['condutividade']:
+        if settingsObj.minConductivityAdsorption >= valuesFromArduino['condutividade']:
             print("minConductivityAdsorption")
             return True
 
     if 'maxConductivityDesorption' in triggers:
-        if settingsObj.maxConductivityDesorption < valuesFromArduino['condutividade']:
+        if settingsObj.maxConductivityDesorption <= valuesFromArduino['condutividade']:
             print("maxConductivityDesorption")
             return True
 
     if 'cutPotentialAdsorption' in triggers:
-        if settingsObj.cutPotentialAdsorption > valuesFromArduino['potencialcelula']:
+        if settingsObj.cutPotentialAdsorption >= valuesFromArduino['potencialcelula']:
             print("cutPotentialAdsorption")
             return True
 
     if 'cutPotentialDesorption' in triggers:
-        if settingsObj.cutPotentialDesorption > valuesFromArduino['potencialcelula']:
+        if settingsObj.cutPotentialDesorption >= valuesFromArduino['potencialcelula']:
             print("cutPotentialDesorption")
             return True
 
