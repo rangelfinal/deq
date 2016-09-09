@@ -56,8 +56,7 @@ def ArduinoRead(ser):
 
     entrada = ser.readline()  # atribui à variável entrada uma linha vinda do Arduino
 
-    # Procura pelos caractéres identificadores das variáveis na string do
-    # arduino
+    # Procura pelos caractéres identificadores das variáveis na string do arduino
     for i in range(0, len(entrada)):
         if (entrada[i] == 99):  # 99 = c
             valuesFromArduino['condutividade'] = float(entrada[i + 1:i + 8])
@@ -85,6 +84,14 @@ def ArduinoRead(ser):
 
     SaveToArduinoTable(data)
 
+def ArduinoWrite(ser, fonte1, fonte2, solenoide):
+    while (True):
+        ser.write(b'%d;%d;%d' % (fonte1, fonte2, solenoide))
+        entrada = ser.readline()
+        if (entrada[0] == 'r'):
+            break
+        ser.write(b'0;0;0')
+        time.sleep(1)
 
 def SaveToArduinoTable(dataToSave):
     cursor = db.cursor()
@@ -110,7 +117,7 @@ def changeState(ser):
         settingsObj.fonte1 = 0
         settingsObj.fonte2 = 1
         settingsObj.solenoide = 0
-        ser.write(b'0,1,0')
+        ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
         print("De adsorção para dessorção")
 
     else:
@@ -119,12 +126,12 @@ def changeState(ser):
             settingsObj.fonte1 = 1
             settingsObj.fonte2 = 0
             settingsObj.solenoide = 1
-            ser.write(b'1,0,1')
+            ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
         else:
-            ser.write(b'1,0,0')
             settingsObj.fonte1 = 1
             settingsObj.fonte2 = 0
             settingsObj.solenoide = 0
+            ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
         print("De dessorção para adsorção")
 
 
@@ -184,13 +191,8 @@ def main():
     # Inicia o Arduino no estado correto
     print('%d;%d;%d' % (settingsObj.fonte1,
                         settingsObj.fonte2, settingsObj.solenoide))
-    ser.write(b'0,0,0')
-    time.sleep(5)
-    ser.write(b'%d;%d;%d' % (settingsObj.fonte1,
-                             settingsObj.fonte2, settingsObj.solenoide))
-    time.sleep(5)
-    ser.write(b'%d;%d;%d' % (settingsObj.fonte1,
-                             settingsObj.fonte2, settingsObj.solenoide))
+
+    ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
     print("Inicializando Arduino")
 
     # Marca o tempo de início do primeiro estado

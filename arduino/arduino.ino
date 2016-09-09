@@ -45,6 +45,7 @@ void serialRead() {
     solenoide = Serial.parseFloat();
     cleanSerialBuffer();
     exec();
+    Serial.println("r");
   }
 }
 //_______________________________________________________
@@ -81,7 +82,7 @@ void serial1Read() {
         if (variavel == "ph") {
           dtostrf(valor.toFloat(),7, 2, charBuffer);
           ph = "p" + String(charBuffer);
-        } 
+        }
         else if (variavel == "temperature") {
           dtostrf(valor.toFloat(),7, 2, charBuffer);
           temperatura = "t" + String(charBuffer);
@@ -119,7 +120,7 @@ void exec() {
   else {
     digitalWrite( 47, HIGH );
   }
-  
+
   if (fonte1) {
     ads();
   }
