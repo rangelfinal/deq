@@ -107,7 +107,8 @@ void serial1Read() {
       String sContaCiclos = "n" +  String(charBuffer);
       String result = ph+temperatura+condutividade+voltagem+sContaCiclos+sPotencial;
       result.replace(" ","0");
-      Serial.println(result);
+      if (fonte1 || fonte2)
+        Serial.println(result);
       input = "";
     }
   }
