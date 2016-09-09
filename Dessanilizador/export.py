@@ -1,9 +1,12 @@
-import sqlite3
 import csv
-import sys
 import os
+import sqlite3
+import sys
+
 
 # http://stackoverflow.com/questions/3041986/apt-command-line-interface-like-yes-no-input
+
+
 def query_yes_no(question, default="no"):
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
@@ -38,12 +41,13 @@ print("Exportando dados para output.csv!")
 
 with open('output.csv', 'w') as f:
 
-    csv.writer(f).writerow(['Variavel', 'Valor', 'TempoNoEstado', 'TempoTotal', 'Modo', 'Adsorcao', 'Dessorcao', 'Solenoide', 'Horario'])
+    csv.writer(f).writerow(['Variavel', 'Valor', 'TempoNoEstado',
+                            'TempoTotal', 'Modo', 'Adsorcao', 'Dessorcao', 'Solenoide', 'Horario'])
 
     SQLString = 'SELECT AV.name, A.value, A.timeInCurrentState, A.totalTime, AM.name, A.fonte1, A.fonte2, A.solenoide, A.currentTime ' \
-    'FROM arduino A, arduinoVariables AV, arduinoModes AM ' \
-    'WHERE A.variableID=AV.variableID AND A.modeID=AM.modeID ' \
-    'ORDER BY A.currentTime'
+        'FROM arduino A, arduinoVariables AV, arduinoModes AM ' \
+        'WHERE A.variableID=AV.variableID AND A.modeID=AM.modeID ' \
+        'ORDER BY A.currentTime'
 
     cursor = db.cursor().execute(SQLString)
 

@@ -15,11 +15,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 import DEQ
+import tkinter
 from settings import Settings
 
 matplotlib.use('TkAgg')
 
-import tkinter
 
 p = Process(target=DEQ.main)
 
@@ -157,9 +157,10 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, textvariable=self.config['minConductivityAdsorption'], state="disabled")
         self.conductivityOptions['minConductivityAdsorption'].grid(
             column=1, row=6, stick='EW')
-        self.minConductivityAdsorptionRightLabel = tkinter.Label(self.leftPanel, text="µS")
-        self.minConductivityAdsorptionRightLabel.grid(column=2, row=6, stick='EW')
-
+        self.minConductivityAdsorptionRightLabel = tkinter.Label(
+            self.leftPanel, text="µS")
+        self.minConductivityAdsorptionRightLabel.grid(
+            column=2, row=6, stick='EW')
 
         self.maxConductivityDesorptionLabel = tkinter.Label(
             self.leftPanel, text="Condutividade Máxima - Dessorção")
@@ -168,8 +169,10 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, textvariable=self.config['maxConductivityDesorption'], state="disabled")
         self.conductivityOptions['maxConductivityDesorption'].grid(
             column=1, row=7, stick='EW')
-        self.maxConductivityDesorptionRightLabel = tkinter.Label(self.leftPanel, text="µS")
-        self.maxConductivityDesorptionRightLabel.grid(column=2, row=7, stick='EW')
+        self.maxConductivityDesorptionRightLabel = tkinter.Label(
+            self.leftPanel, text="µS")
+        self.maxConductivityDesorptionRightLabel.grid(
+            column=2, row=7, stick='EW')
 
         self.potentialOptions = {}
 
@@ -180,7 +183,8 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, textvariable=self.config['cutPotentialAdsorption'], state="disabled")
         self.potentialOptions['cutPotentialAdsorption'].grid(
             column=1, row=8, stick='EW')
-        self.cutPotentialAdsorptionRightLabel = tkinter.Label(self.leftPanel, text="mV")
+        self.cutPotentialAdsorptionRightLabel = tkinter.Label(
+            self.leftPanel, text="mV")
         self.cutPotentialAdsorptionRightLabel.grid(column=2, row=8, stick='EW')
 
         self.cutPotentialDesorptionLabel = tkinter.Label(
@@ -190,7 +194,8 @@ class simpleapp_tk(tkinter.Tk):
             self.leftPanel, textvariable=self.config['cutPotentialDesorption'], state="disabled")
         self.potentialOptions['cutPotentialDesorption'].grid(
             column=1, row=9, stick='EW')
-        self.cutPotentialDesorptionRightLabel = tkinter.Label(self.leftPanel, text="mV")
+        self.cutPotentialDesorptionRightLabel = tkinter.Label(
+            self.leftPanel, text="mV")
         self.cutPotentialDesorptionRightLabel.grid(column=2, row=8, stick='EW')
 
         self.numberCiclesLabel = tkinter.Label(
@@ -206,7 +211,8 @@ class simpleapp_tk(tkinter.Tk):
         self.maxConductivity = tkinter.Entry(
             self.leftPanel, textvariable=self.config['maxConductivity'])
         self.maxConductivity.grid(column=1, row=11, stick='EW')
-        self.maxConductivityRightLabel = tkinter.Label(self.leftPanel, text="mV")
+        self.maxConductivityRightLabel = tkinter.Label(
+            self.leftPanel, text="mV")
         self.maxConductivityRightLabel.grid(column=2, row=11, stick='EW')
 
         self.ShowLast30PointsLabel = tkinter.Label(
@@ -283,7 +289,7 @@ class simpleapp_tk(tkinter.Tk):
         self.DBConfig.currentExecutionStartTime = time.time()
         self.saveConfigToDb()
 
-        #Limpa os gráficos
+        # Limpa os gráficos
         self.figure.clear()
         self.initializePlots()
 
@@ -402,10 +408,12 @@ class simpleapp_tk(tkinter.Tk):
                             self.potentialGraph['subplot'].plot([item[1] for item in result], [
                                                                 item[0] for item in result], 'go-')
                         try:
-                            self.config['currentPotential'].set(result[-1][-1][0])
+                            self.config['currentPotential'].set(
+                                result[-1][-1][0])
                         except:
                             try:
-                                self.config['currentPotential'].set(result[-1][0])
+                                self.config['currentPotential'].set(
+                                    result[-1][0])
                             except:
                                 pass
                     else:

@@ -1,5 +1,6 @@
 import sqlite3
 
+
 def createDB():
     db = sqlite3.connect('../Dessanilizador/DEQ.sqlite')
     cursor = db.cursor()
