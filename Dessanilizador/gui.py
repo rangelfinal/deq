@@ -52,6 +52,7 @@ class simpleapp_tk(tkinter.Tk):
         self.DBConfig.currentUUID = uuid.uuid4().hex
 
         self.config['modeID'] = tkinter.IntVar()
+        self.config['modeID'].set(self.DBConfig.modeID)
         self.config['toggleSingle'] = tkinter.BooleanVar()
         self.config['toggleSingle'].set(self.DBConfig.toggleSingle)
         self.config['toggleAdsorption'] = tkinter.BooleanVar()
@@ -233,7 +234,7 @@ class simpleapp_tk(tkinter.Tk):
         self.gridspec = gridspec.GridSpec(5, 2)
         self.gridspec.update(hspace=0.3, wspace=0.3)
 
-        self.initializeGraphs()
+        self.initializePlots()
 
         self.canvas.get_tk_widget().grid(column=0, row=0)
         self.canvas.show()
@@ -284,7 +285,7 @@ class simpleapp_tk(tkinter.Tk):
 
         #Limpa os gráficos
         self.figure.clear()
-        self.initializeGraphs()
+        self.initializePlots()
 
         global p
         if p.is_alive():
@@ -312,7 +313,7 @@ class simpleapp_tk(tkinter.Tk):
         self.saveConfigToDb()
         print("Desligando")
 
-    def initializeGraphs(self):
+    def initializePlots(self):
         self.conductivityGraph = {}
         self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[
                                                                     :-2, :])

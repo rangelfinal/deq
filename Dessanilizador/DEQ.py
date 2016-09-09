@@ -88,13 +88,17 @@ def ArduinoRead(ser):
 def ArduinoWrite(ser, fonte1, fonte2, solenoide):
     while (True):
         ser.write(b'%d;%d;%d' % (fonte1, fonte2, solenoide))
+        time.sleep(1)
         entrada = ser.readline()
-        if (entrada[0] == 'r'):
+        if ('r' in entrada):
             break
         ser.write(b'0;0;0')
         time.sleep(1)
 
 def SaveToArduinoTable(dataToSave):
+    if data[0] == -1:
+        return True
+
     cursor = db.cursor()
     sqlStringTemplate = (
         '''INSERT INTO arduino(variableID, value, modeID, fonte1, fonte2, solenoide, currentUUID, timeInCurrentState, totalTime) VALUES(?,?,?,?,?,?,?,?,?)''')
@@ -158,12 +162,14 @@ def shouldChangeStates(triggers):
             return True
 
     if 'cutPotentialAdsorption' in triggers:
-        if settingsObj.cutPotentialAdsorption >= valuesFromArduino['potencialcelula']:
+        if valuesFromArduino['potencialcelula'] != -1 and settingsObj.cutPotentialAdsorption >= valuesFromArduino['potencialcelula']:
+            valuesFromArduino['potencialcelula'] = -1
             print("cutPotentialAdsorption")
             return True
 
     if 'cutPotentialDesorption' in triggers:
-        if settingsObj.cutPotentialDesorption >= valuesFromArduino['potencialcelula']:
+        if valuesFromArduino['potencialcelula'] != -1 and settingsObj.cutPotentialDesorption >= valuesFromArduino['potencialcelula']:
+            valuesFromArduino['potencialcelula'] = -1
             print("cutPotentialDesorption")
             return True
 
