@@ -3,12 +3,12 @@
 import sqlite3
 import sys
 import time
+
 import serial
 import serial.tools.list_ports
-from tkinter import messagebox
 
 from settings import Settings
-
+from tkinter import messagebox
 
 db = sqlite3.connect('DEQ.sqlite')  # Conecta ao banco de dados
 settingsObj = Settings()  # Cria um novo objeto para armazenar configurações
@@ -21,6 +21,8 @@ valuesFromArduino['temperatura'] = 0
 
 # Função que setará o Arduino, escolhendo automaticamnte a porta em que
 # ele está conectado e abrindo a sessão
+
+
 def ArduinoSetup():
 
     ports = list(serial.tools.list_ports.comports())
@@ -53,11 +55,14 @@ def ArduinoSetup():
 
 # Lê as informações vindas do arduino e salva no DB, o tempo de início da
 # execução é o argumento
+
+
 def ArduinoRead(ser):
 
     entrada = ser.readline()  # atribui à variável entrada uma linha vinda do Arduino
 
-    # Procura pelos caractéres identificadores das variáveis na string do arduino
+    # Procura pelos caractéres identificadores das variáveis na string do
+    # arduino
     for i in range(0, len(entrada)):
         if (entrada[i] == 99):  # 99 = c
             valuesFromArduino['condutividade'] = float(entrada[i + 1:i + 8])
@@ -85,8 +90,12 @@ def ArduinoRead(ser):
 
     SaveToArduinoTable(data)
 
+
 def ArduinoWrite(ser, fonte1, fonte2, solenoide):
+    tryCount = 0
     while (True):
+        if tryCount >= 10:
+            return False
         ser.write(b'%d;%d;%d' % (fonte1, fonte2, solenoide))
         time.sleep(1)
         entrada = ser.readline()
@@ -94,6 +103,9 @@ def ArduinoWrite(ser, fonte1, fonte2, solenoide):
             break
         ser.write(b'0;0;0')
         time.sleep(1)
+        tryCount += 1
+    return True
+
 
 def SaveToArduinoTable(dataToSave):
     if data[0] == -1:
@@ -122,7 +134,8 @@ def changeState(ser):
         settingsObj.fonte1 = 0
         settingsObj.fonte2 = 1
         settingsObj.solenoide = 0
-        ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
+        ArduinoWrite(ser, settingsObj.fonte1,
+                     settingsObj.fonte2, settingsObj.solenoide)
         print("De adsorção para dessorção")
 
     else:
@@ -131,12 +144,14 @@ def changeState(ser):
             settingsObj.fonte1 = 1
             settingsObj.fonte2 = 0
             settingsObj.solenoide = 1
-            ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
+            ArduinoWrite(ser, settingsObj.fonte1,
+                         settingsObj.fonte2, settingsObj.solenoide)
         else:
             settingsObj.fonte1 = 1
             settingsObj.fonte2 = 0
             settingsObj.solenoide = 0
-            ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
+            ArduinoWrite(ser, settingsObj.fonte1,
+                         settingsObj.fonte2, settingsObj.solenoide)
         print("De dessorção para adsorção")
 
 
@@ -199,7 +214,11 @@ def main():
     print('%d;%d;%d' % (settingsObj.fonte1,
                         settingsObj.fonte2, settingsObj.solenoide))
 
-    ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide)
+    if ArduinoWrite(ser, settingsObj.fonte1, settingsObj.fonte2, settingsObj.solenoide) == False:
+        settingsObj.toggleOn = False
+        ser.write(b'0,0,0')
+        return
+
     print("Inicializando Arduino")
 
     # Marca o tempo de início do primeiro estado
