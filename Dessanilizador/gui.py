@@ -233,34 +233,7 @@ class simpleapp_tk(tkinter.Tk):
         self.gridspec = gridspec.GridSpec(5, 2)
         self.gridspec.update(hspace=0.3, wspace=0.3)
 
-        self.conductivityGraph = {}
-        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[
-                                                                    :-2, :])
-        self.conductivityGraph['subplot'].set_title("Condutividade")
-        self.conductivityGraph['subplot'].tick_params(
-            direction='inout', length=6, width=2, colors='b')
-        self.conductivityGraph['subplot'].grid(True)
-        self.conductivityGraph['subplot'].set_xlabel("Tempo (s)")
-        self.conductivityGraph['subplot'].set_xbound(lower=0)
-
-        self.pHGraph = {}
-        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:, 0])
-        self.pHGraph['subplot'].set_title("pH")
-        self.pHGraph['subplot'].tick_params(
-            direction='inout', length=6, width=2, colors='b')
-        self.pHGraph['subplot'].grid(True)
-        self.pHGraph['subplot'].set_xlabel("Tempo (s)")
-        self.pHGraph['subplot'].set_xbound(lower=0)
-
-        self.potentialGraph = {}
-        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[
-                                                                 3:, 1])
-        self.potentialGraph['subplot'].set_title("Potencial")
-        self.potentialGraph['subplot'].tick_params(
-            direction='inout', length=6, width=2, colors='b')
-        self.potentialGraph['subplot'].grid(True)
-        self.potentialGraph['subplot'].set_xlabel("Tempo (s)")
-        self.potentialGraph['subplot'].set_xbound(lower=0)
+        self.initializeGraphs()
 
         self.canvas.get_tk_widget().grid(column=0, row=0)
         self.canvas.show()
@@ -308,6 +281,11 @@ class simpleapp_tk(tkinter.Tk):
         self.DBConfig.currentUUID = uuid.uuid4().hex
         self.DBConfig.currentExecutionStartTime = time.time()
         self.saveConfigToDb()
+
+        #Limpa os gráficos
+        self.figure.clear()
+        self.initializeGraphs()
+
         global p
         if p.is_alive():
             p.join()
@@ -333,6 +311,36 @@ class simpleapp_tk(tkinter.Tk):
         self.toggleOn.config(text="Ligar")
         self.saveConfigToDb()
         print("Desligando")
+
+    def initializeGraphs(self):
+        self.conductivityGraph = {}
+        self.conductivityGraph['subplot'] = self.figure.add_subplot(self.gridspec[
+                                                                    :-2, :])
+        self.conductivityGraph['subplot'].set_title("Condutividade")
+        self.conductivityGraph['subplot'].tick_params(
+            direction='inout', length=6, width=2, colors='b')
+        self.conductivityGraph['subplot'].grid(True)
+        self.conductivityGraph['subplot'].set_xlabel("Tempo (s)")
+        self.conductivityGraph['subplot'].set_xbound(lower=0)
+
+        self.pHGraph = {}
+        self.pHGraph['subplot'] = self.figure.add_subplot(self.gridspec[3:, 0])
+        self.pHGraph['subplot'].set_title("pH")
+        self.pHGraph['subplot'].tick_params(
+            direction='inout', length=6, width=2, colors='b')
+        self.pHGraph['subplot'].grid(True)
+        self.pHGraph['subplot'].set_xlabel("Tempo (s)")
+        self.pHGraph['subplot'].set_xbound(lower=0)
+
+        self.potentialGraph = {}
+        self.potentialGraph['subplot'] = self.figure.add_subplot(self.gridspec[
+                                                                 3:, 1])
+        self.potentialGraph['subplot'].set_title("Potencial")
+        self.potentialGraph['subplot'].tick_params(
+            direction='inout', length=6, width=2, colors='b')
+        self.potentialGraph['subplot'].grid(True)
+        self.potentialGraph['subplot'].set_xlabel("Tempo (s)")
+        self.potentialGraph['subplot'].set_xbound(lower=0)
 
     def updateGraph(self):
         for variableID in [1, 2, 3]:
